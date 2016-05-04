@@ -149,3 +149,8 @@ function watchWindows(callback) {
   // Make sure to stop watching for windows if we're unloading
   unload(function() Services.ww.unregisterNotification(windowWatcher));
 }
+
+function sendPing(payload) {
+  const observerService = Cc['@mozilla.org/observer-service;1'].getService(Ci.nsIObserverService);
+  observerService.notifyObservers('tabcentertest1@mozilla.com', 'testpilot::send-metric', JSON.stringify(payload));
+}
