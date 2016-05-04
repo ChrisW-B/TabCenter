@@ -19,3 +19,6 @@ all: TabCenterTest.xpi
 TabCenterTest.xpi: $(SOURCES)
 	rm -f ./$@
 	zip -9r ./$@ $(SOURCES)
+
+clean:
+		rm TabCenterTest.xpi
