@@ -34,20 +34,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const {
+  classes: Cc,
+  interfaces: Ci,
+  utils: Cu
+} = Components;
 
 Cu.import("resource://gre/modules/Services.jsm");
 
 const RESOURCE_HOST = "tabcenter";
 const DEFAULT_PREFS = {
   "browser.tabs.animate": false,
-  "browser.tabs.drawInTitlebar": false
+  "browser.tabs.drawInTitlebar": true
 };
 
 /**
  * Load and execute another file.
  */
 let GLOBAL_SCOPE = this;
+
 function include(src) {
   Services.scriptloader.loadSubScript(src, GLOBAL_SCOPE);
 }
@@ -56,15 +61,15 @@ function setDefaultPrefs() {
   let branch = Services.prefs.getDefaultBranch("");
   for (let [name, value] in Iterator(DEFAULT_PREFS)) {
     switch (typeof value) {
-    case "boolean":
-      Services.prefs.setBoolPref(name, value);
-      break;
-    case "number":
-      Services.prefs.setIntPref(name, value);
-      break;
-    case "string":
-      Services.prefs.setCharPref(name, value);
-      break;
+      case "boolean":
+        Services.prefs.setBoolPref(name, value);
+        break;
+      case "number":
+        Services.prefs.setIntPref(name, value);
+        break;
+      case "string":
+        Services.prefs.setCharPref(name, value);
+        break;
     }
   }
 }
@@ -76,8 +81,7 @@ function removeDefaultPrefs() {
   }
 }
 
-function install() {
-}
+function install() {}
 
 function startup(data, reason) {
   // Load helpers from utils.js.
@@ -87,9 +91,9 @@ function startup(data, reason) {
 
   // Register the resource:// alias.
   let resource = Services.io.getProtocolHandler("resource")
-                         .QueryInterface(Ci.nsIResProtocolHandler);
+    .QueryInterface(Ci.nsIResProtocolHandler);
   resource.setSubstitution(RESOURCE_HOST, data.resourceURI);
-  unload(function () {
+  unload(function() {
     resource.setSubstitution(RESOURCE_HOST, null);
   });
 
@@ -110,5 +114,4 @@ function shutdown(data, reason) {
   unload();
 }
 
-function uninstall() {
-}
+function uninstall() {}
