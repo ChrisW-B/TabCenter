@@ -20,6 +20,10 @@
 
 .tabbrowser-arrowscrollbox {
   flex: 1 0;
+  height: calc(100vh - 78px);
+}
+
+#main-window[inFullscreen] .tabbrowser-arrowscrollbox{
   height: calc(100vh - 42px);
 }
 
