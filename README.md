@@ -1,5 +1,6 @@
 # TabCenter <a href="http://testpilot.dev.mozaws.net/experiments/tabcenter"><img align="right" src="https://img.shields.io/badge/available_on-Test_Pilot-0996F8.svg"></a>
 
+### This is a modification of the addon which removes the title bar and makes the collapsed sidebar narrower to create more space for browsing. In order to install it, you will have to use the provided make file
 
 Tabbed browsing is a concept that has existed for a long time without
 being seriously re-evaluated. In that time, browsing behaviors have
