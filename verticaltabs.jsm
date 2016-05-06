@@ -178,9 +178,11 @@ VerticalTabs.prototype = {
         contentbox.appendChild(bottom);
         let top = document.getElementById("navigator-toolbox");
 
-        // save the label of the first tab for later…
+        // save the label of the first tab, and the toolbox palette for later…
         let tabs = document.getElementById("tabbrowser-tabs");
         let label = tabs.firstChild.label;
+        let palette = top.palette;
+
         contentbox.insertBefore(top, contentbox.firstChild);
 
         // Create a box next to the app content. It will hold the tab
@@ -199,8 +201,9 @@ VerticalTabs.prototype = {
         tabs.mTabstrip.orient = "vertical";
         tabs.tabbox.orient = "horizontal"; // probably not necessary
 
-        // And restore the label here.
+        // And restore the label and palette here.
         tabs.firstChild.label = label;
+        top.palette = palette;
 
         // Move the tabs toolbar into the tab strip
         let toolbar = document.getElementById("TabsToolbar");
@@ -245,10 +248,6 @@ VerticalTabs.prototype = {
           }
         });
 
-        let toolbar_context_menu = document.getElementById("toolbar-context-menu");
-        toolbar_context_menu.firstChild.collapsed = true;
-        toolbar_context_menu.firstChild.nextSibling.collapsed = true; // separator
-
         tabs.addEventListener("TabOpen", this, false);
         window.setTimeout(() => {
           if (mainWindow.getAttribute("tabspinned") === "true") {
@@ -278,9 +277,6 @@ VerticalTabs.prototype = {
             tabs.removeAttribute("width");
             tabs.removeEventListener("TabOpen", this, false);
             tabs.removeAttribute("vertical");
-
-            toolbar_context_menu.firstChild.collapsed = false;
-            toolbar_context_menu.firstChild.nextSibling.collapsed = false; // separator
 
             // Restore all individual tabs.
             for (let i = 0; i < tabs.childNodes.length; i++) {
