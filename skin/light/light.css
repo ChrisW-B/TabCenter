@@ -142,7 +142,7 @@
 .browserContainer{
   margin-bottom:-5px!important;
 }
-/****************** ??? CHANGE ********************/
+
 #main-window[sizemode="normal"] #PopupAutoCompleteRichResult {
   margin-left: -62px !important;
 }
@@ -179,7 +179,7 @@
     min-height: 36px !important;
     max-height: 36px !important;
     color: #333333 !important;
-    border-left: 4px solid transparent !important;
+    border-left: 2px solid transparent !important;
     width: 260px !important;
 }
 
@@ -189,7 +189,7 @@
     background-color: #dadada !important;
     font-weight: normal;
     text-shadow: none;
-    border-left: 4px solid #ff9500 !important;
+    border-left: 2px solid #ff9500 !important;
     border-radius: 0 !important;
     font-weight: 600 !important;
 }
@@ -201,7 +201,7 @@
 }
 
 .tabbrowser-tab[pinned] {
-  border-left: 4px solid #0996f8 !important;
+  border-left: 2px solid #0996f8 !important;
 }
 
 .tabbrowser-tab:not([selected="true"]):hover {
@@ -434,7 +434,7 @@
 #main-window #browser[tabspinned="true"] #nav-bar {
   margin-left:-260px;
 }
-#main-window #browser[tabspinned="true"] #urlbar-container{
+#main-window[tabspinned="true"] #urlbar-container{
   margin-left: 60px;
 }
 
