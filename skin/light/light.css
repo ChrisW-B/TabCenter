@@ -458,13 +458,12 @@
   }
 
   #nav-bar {
-    margin-left: 0px;
+    margin-left: -140px;
     margin-right: 140px;
   }
 
-
   #main-window[tabspinned="true"] #nav-bar {
-    margin-left: -260px;
+    margin-left: 0px;
   }
 
   #verticaltabs-box {
