@@ -450,7 +450,7 @@
     border-left: 1px solid rgb(160,160,160);
   }
   #TabsToolbar {
-    flex: 0 0 44px !important;
+    flex: 0 0 38px !important;
     margin: 0 !important;
   }
   #nav-bar {
@@ -459,16 +459,12 @@
 
   #nav-bar {
     margin-left: 0px;
+    margin-right: 140px;
   }
 
-  #urlbar-container {
-    margin-left: 0px;
-    margin-right:160px;
-  }
 
   #main-window[tabspinned="true"] #nav-bar {
-    margin-left: 0px;
-    margin-right:160px;
+    margin-left: -260px;
   }
 
   #verticaltabs-box {
