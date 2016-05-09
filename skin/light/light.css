@@ -411,23 +411,6 @@
   background-image: none !important;
 }
 
-@media (-moz-os-version: windows-win7), (-moz-os-version: windows-win8) {
-  #appcontent {
-    top: 1px;
-  }
-  #verticaltabs-box {
-    top: 1px;
-    border-left: 1px solid rgb(160,160,160);
-  }
-  #TabsToolbar {
-    flex: 0 0 44px !important;
-    margin: 0 !important;
-  }
-  #nav-bar {
-    border-left: none !important;
-  }
-}
-
 #nav-bar{
   margin-left:-100px;
 }
@@ -447,16 +430,56 @@
 #main-window[sizemode="fullscreen"] #urlbar-container{
   margin-left: 0px;
 }
-#main-window[sizemode="fullscreen"] #browser[tabspinned="true"] #nav-bar {
+#main-window[sizemode="fullscreen"][tabspinned="true"] #nav-bar {
   margin-left: 0px;
 }
-#main-window[sizemode="fullscreen"] #browser[tabspinned="true"] #urlbar-container{
+#main-window[sizemode="fullscreen"][tabspinned="true"] #urlbar-container{
   margin-left: 0px;
 }
 
 #main-window[sizemode="fullscreen"] #verticaltabs-box{
   margin-top: -40px;
 }
+
+@media (-moz-os-version: windows-win7), (-moz-os-version: windows-win8), (-moz-os-version: windows-win10) {
+  #appcontent {
+    top: 1px;
+  }
+  #verticaltabs-box {
+    top: 1px;
+    border-left: 1px solid rgb(160,160,160);
+  }
+  #TabsToolbar {
+    flex: 0 0 44px !important;
+    margin: 0 !important;
+  }
+  #nav-bar {
+    border-left: none !important;
+  }
+
+  #nav-bar {
+    margin-left: 0px;
+  }
+
+  #urlbar-container {
+    margin-left: 0px;
+  }
+
+  #main-window[tabspinned="true"] #nav-bar {
+    margin-left: 0px;
+    margin-right:60px;
+  }
+
+  #main-window[tabspinned="true"] #urlbar-container {
+    margin-left: 260px;
+  }
+
+  #verticaltabs-box {
+    margin-top: -40px;
+  }
+}
+
+
 
 #alltabs-button, #new-tab-button .toolbarbutton-text{
   display: none!important;
