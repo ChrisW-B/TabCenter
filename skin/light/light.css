@@ -463,19 +463,16 @@
 
   #urlbar-container {
     margin-left: 0px;
+    margin-right:160px;
   }
 
   #main-window[tabspinned="true"] #nav-bar {
     margin-left: 0px;
-    margin-right:60px;
-  }
-
-  #main-window[tabspinned="true"] #urlbar-container {
-    margin-left: 260px;
+    margin-right:160px;
   }
 
   #verticaltabs-box {
-    margin-top: -40px;
+    margin-top: 0px;
   }
 }
 
