@@ -417,7 +417,7 @@
 #urlbar-container{
   margin-left: 130px;
 }
-#main-window #browser[tabspinned="true"] #nav-bar {
+#main-window[tabspinned="true"] #nav-bar {
   margin-left:-260px;
 }
 #main-window[tabspinned="true"] #urlbar-container{
