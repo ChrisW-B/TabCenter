@@ -76,7 +76,7 @@
 
 #verticaltabs-box:hover {
   width: 260px;
-  transition-delay:1.5s; /*allow waiting before expansion*/
+  transition-delay:0.75s; /*allow waiting before expansion*/
 }
 
 #main-window[tabspinned="true"] #verticaltabs-box {
