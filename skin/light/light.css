@@ -5,14 +5,6 @@
 }
 
 .tabbrowser-tabs {
-/* <<<<<<< HEAD
-    box-sizing: border-box;
-    flex: 1 0;
-    height: calc(100vh - 42px);
-    overflow-y: hidden;
-    margin: 0 !important;
-    padding: 0 !important;
-======= */
   overflow-y: hidden;
   box-sizing: border-box;
   margin: 0 !important;
@@ -52,39 +44,24 @@
 }
 
 #browser {
-  display: block;
-  height: calc(100vh + 14px);
-  position:relative;
-}
-
-#verticaltabs-box {
-  background-color: #fbfbfb !important;
-  border-top: 1px solid rgb(179,179,179);
-  box-sizing: border-box;
+  height: calc(100vh - 40px);
   position: relative;
-  height: 100vh;
+/*   bottom:5px; */
 }
-
-/* changed stuff
-#verticaltabs-box {
-  border-top: 1px solid rgb(179,179,179);
-  top: 39px;
-} */
 
 #verticaltabs-box {
   position: absolute;
   z-index: 3;
-  top: 0;
+  top: 39px;
   left: 0;
   width: 30px;
   height: 100vh;
-  border-top: 1px solid rgb(160, 160, 160) !important;
+  border-top: 1px solid rgb(179,179,179) !important;
   border-right: 1px solid ThreeDShadow;
   display: flex;
   overflow-x: hidden;
   box-sizing: border-box;
   background-color: #fbfbfb !important;
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0), inset 0 0 10px rgba(0, 0, 0, 0.2); */
   flex-direction: column;
   transition: box-shadow 150ms ease-out 300ms, width 150ms ease-out 300ms;
 }
@@ -137,17 +114,8 @@
 /*#browser-box {*/
 
 #appcontent {
-  border-top: 1px solid rgb(160,160,160);
-  left: 30px;
   top: -1px;
-  position: absolute;
-}
-
-#appcontent,
-#PopupAutoCompleteRichResult {
-  left: 30px;
-  top: 0;
-  /* border-top: 1px solid rgb(160, 160, 160); */
+  margin-bottom:5px;
 }
 
 #sidebar-box[hidden="true"] ~ #appcontent,
@@ -199,13 +167,6 @@
 #main-window[tabspinned="true"] #PopupAutoCompleteRichResult {
   width: calc(100vw - 260px);
 }
-
-
-<<<<<<< HEAD
-#content notificationbox {
-  height: calc(100vh - 45px);
-}
-
 
 #main-window[inFullscreen][inDOMFullscreen] .browserContainer {
   margin-top: -1px;
