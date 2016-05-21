@@ -87,20 +87,68 @@ function vtInit() {
  *
  * Main entry point of this add-on.
  */
-function VerticalTabs(window, {newPayload, addPingStats}) {
+function VerticalTabs(window, {newPayload, addPingStats, AppConstants, setDefaultPrefs}) {
   this.window = window;
   this.document = window.document;
   this.unloaders = [];
   this.addPingStats = addPingStats;
   this.newPayload = newPayload;
+  this.setDefaultPrefs = setDefaultPrefs;
+  this.AppConstants = AppConstants;
   this.stats = this.newPayload();
   this.init();
 }
 VerticalTabs.prototype = {
 
   init: function () {
+    this.BrowserOpenTab = this.window.BrowserOpenTab;
+    this.window.BrowserOpenTab = function () {
+      this.pushToTop = true;
+      this.window.openUILinkIn(this.window.BROWSER_NEW_TAB_URL, 'tab');
+      this.pushToTop = false;
+    }.bind(this);
+
     this.window.VerticalTabs = this;
+    this.inferFromText = this.window.ToolbarIconColor.inferFromText;
+    let AppConstants = this.AppConstants;
+    let window = this.window;
+    let document = this.document;
+    window.ToolbarIconColor.inferFromText = function () {
+      if (!this._initialized){
+        return;
+      }
+
+      function parseRGB(aColorString) {
+        let rgb = aColorString.match(/^rgba?\((\d+), (\d+), (\d+)/);
+        rgb.shift();
+        return rgb.map(x => parseInt(x));
+      }
+
+      let toolbarSelector = '#verticaltabs-box, #verticaltabs-box > toolbar:not([collapsed=true]):not(#addon-bar)';
+      if (AppConstants.platform === 'macosx') {
+        toolbarSelector += ':not([type=menubar])';
+      }
+      // The getComputedStyle calls and setting the brighttext are separated in
+      // two loops to avoid flushing layout and making it dirty repeatedly.
+
+      let luminances = new Map;
+      for (let toolbar of document.querySelectorAll(toolbarSelector)) {
+        let [r, g, b] = parseRGB(window.getComputedStyle(toolbar).color);
+        let luminance = 0.2125 * r + 0.7154 * g + 0.0721 * b;
+        luminances.set(toolbar, luminance);
+      }
+
+      for (let [toolbar, luminance] of luminances) {
+        if (luminance <= 110) {
+          toolbar.removeAttribute('brighttext');
+        } else {
+          toolbar.setAttribute('brighttext', 'true');
+        }
+      }
+    }.bind(this.window.ToolbarIconColor);
     this.unloaders.push(function () {
+      this.window.ToolbarIconColor.inferFromText = this.inferFromText;
+      this.window.BrowserOpenTab = this.BrowserOpenTab;
       delete this.window.VerticalTabs;
     });
     this.window.onunload = () => {
@@ -125,11 +173,6 @@ VerticalTabs.prototype = {
           let tab = mutation.target;
           if (mutation.attributeName === 'crop' && !tabs.expanded) {
             tab.removeAttribute('crop');
-          } else if (mutation.attributeName === 'progress' &&
-              !tab.getAttribute('progress')) {
-            if (tab.linkedBrowser.contentDocument.URL === 'about:newtab') {
-              this.window.gBrowser.moveTabTo(tab, 0);
-            }
           }
         } else if (mutation.type === 'attributes' &&
                    mutation.target.id === 'PopupAutoCompleteRichResult' &&
@@ -181,6 +224,7 @@ VerticalTabs.prototype = {
     let bottom = document.getElementById('browser-bottombox');
     contentbox.appendChild(bottom);
     let top = document.getElementById('navigator-toolbox');
+    let browserPanel = document.getElementById('browser-panel');
 
     // save the label of the first tab, and the toolbox palette for later…
     let tabs = document.getElementById('tabbrowser-tabs');
@@ -275,6 +319,20 @@ VerticalTabs.prototype = {
       }
     }, 150);
 
+    window.addEventListener('beforecustomization', function () {
+      browserPanel.insertBefore(top, browserPanel.firstChild);
+      top.palette = palette;
+    });
+
+    window.addEventListener('customizationchange', () => {
+      this.setDefaultPrefs();
+    });
+
+    window.addEventListener('aftercustomization', function () {
+      contentbox.insertBefore(top, contentbox.firstChild);
+      top.palette = palette;
+    });
+
     this.unloaders.push(function () {
       // Move the tabs toolbar back to where it was
       toolbar._toolbox = null; // reset value set by constructor
@@ -286,6 +344,11 @@ VerticalTabs.prototype = {
       let navbar = document.getElementById('nav-bar');
       let browserPanel = document.getElementById('browser-panel');
       let new_tab_button = document.getElementById('new-tab-button');
+
+      //remove customization event listeners which move the toolbox
+      window.removeEventListener('beforecustomization');
+      window.removeEventListener('aftercustomization');
+      window.removeEventListener('customizationchange');
 
       // Put the tabs back up top
       tabs.orient = 'horizontal';
@@ -349,6 +412,9 @@ VerticalTabs.prototype = {
   },
 
   initTab: function (aTab) {
+    if (this.pushToTop) {
+      this.window.gBrowser.moveTabTo(aTab, 0);
+    }
     if (this.document.getElementById('main-window').getAttribute('tabspinned') !== 'true') {
       aTab.removeAttribute('crop');
     } else {
@@ -395,7 +461,16 @@ VerticalTabs.prototype = {
 
   onTabSelect: function (aEvent) {
     let tab = aEvent.target;
-    tab.scrollIntoView();
+    let elemTop = tab.getBoundingClientRect().top;
+    let elemBottom = tab.getBoundingClientRect().bottom;
+    let overTop = elemTop < 63;
+    let overBottom = elemBottom > this.window.innerHeight;
+
+    if (overTop) {
+      tab.scrollIntoView(true);
+    } else if (overBottom) {
+      tab.scrollIntoView(false);
+    }
   },
 
   onTabOpen: function (aEvent) {
