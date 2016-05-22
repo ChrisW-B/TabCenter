@@ -34,7 +34,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 /* global Iterator:false, unload:false, vtInit:false, watchWindows:false,
            VerticalTabs:false, newPayload:false, sendPing:false,
            addPingStats:false, APP_SHUTDOWN:false, AppConstants: false */

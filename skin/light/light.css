@@ -66,7 +66,6 @@
   transition: box-shadow 150ms ease-out 300ms, width 150ms ease-out 300ms;
 }
 
-
 #main-window[inFullscreen] #TabsToolbar{
   border-bottom: 1px solid rgb(179,179,179);
 }
