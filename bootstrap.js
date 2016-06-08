@@ -51,8 +51,7 @@ Cu.import('resource://gre/modules/Services.jsm');
 
 const RESOURCE_HOST = 'tabcenter';
 const DEFAULT_PREFS = {
-  'browser.tabs.animate': false,
-  'browser.tabs.drawInTitlebar': true
+  'browser.tabs.animate': false
 };
 
 /**

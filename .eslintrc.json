@@ -12,8 +12,7 @@
     "Services": false,
     "Cc": false,
     "Ci": false,
-    "TAB_DROP_TYPE": false,
-    "TabsInTitlebar": true
+    "TAB_DROP_TYPE": false
   },
   "rules": {
     "mozilla/import-globals-from": 1,
