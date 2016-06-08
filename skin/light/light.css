@@ -1,5 +1,9 @@
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
+:root {
+  --tab-animation-time: 150ms;
+}
+
 #main-window[privatebrowsingmode="temporary"] #titlebar-buttonbox-container {
   margin-top: 4px;
 }
@@ -13,7 +17,7 @@
   flex: 1 0;
 }
 
-#verticaltabs-box:hover .tabbrowser-tabs,
+#verticaltabs-box[expanded="true"] .tabbrowser-tabs,
 #main-window[tabspinned="true"] #verticaltabs-box .tabbrowser-tabs {
   overflow-y: auto;
 }
@@ -28,11 +32,22 @@
   flex: 1 0;
 }
 
+.tabbrowser-arrowscrollbox:not(:-moz-lwtheme) {
+  height: calc(100vh - 41px);
+}
+
+@media (-moz-os-version: windows-xp), (-moz-os-version: windows-vista), (-moz-os-version: windows-win7), (-moz-os-version: windows-win8), (-moz-os-version: windows-win10) {
+  .tabbrowser-arrowscrollbox,
+  .tabbrowser-arrowscrollbox:not(:-moz-lwtheme) {
+    height: calc(100vh - 42px);
+  }
+}
+
 #verticaltabs-box .tabbrowser-arrowscrollbox > scrollbox {
   overflow-y: hidden !important;
 }
 
-#verticaltabs-box:hover .tabbrowser-arrowscrollbox > scrollbox,
+#verticaltabs-box[expanded="true"] .tabbrowser-arrowscrollbox > scrollbox,
 #main-window[tabspinned="true"] #verticaltabs-box .tabbrowser-arrowscrollbox > scrollbox {
   overflow-y: auto !important;
 }
@@ -79,7 +94,7 @@
   top:60px!important;
 }
 
-#verticaltabs-box:hover {
+#verticaltabs-box[expanded="true"] {
   width: 260px;
   transition-delay: 0.75s; /*allow waiting before expansion*/
 }
@@ -94,12 +109,15 @@
   visibility: hidden;
 }
 
-#pin-button {
+#TabsToolbar > #pin-button {
   width: 40px;
   margin: 0 !important;
   border: none !important;
+  display: -moz-box;
   -moz-appearance: none !important;
   background: no-repeat center/16px url("resource://tabcenter/skin/pin.png");
+  opacity: 0;
+  transition: opacity 125ms ease-in-out 300ms;
 }
 
 #main-window[tabspinned="true"] #verticaltabs-box #pin-button {
@@ -113,6 +131,11 @@
 
 #main-window[tabspinned="true"] #TabsToolbar[brighttext] #pin-button {
   background-image: url("resource://tabcenter/skin/pin.png");
+}
+
+#verticaltabs-box[expanded="true"] #pin-button,
+#main-window[tabspinned="true"] #pin-button {
+  opacity: 1;
 }
 
 #appcontent {
@@ -138,7 +161,8 @@
   margin-left: 260px;
 }
 
-#main-window[chromehidden*="toolbar"] #appcontent {
+#main-window[chromehidden*="toolbar"] #appcontent,
+#main-window[chromehidden*="toolbar"] #sidebar-box[hidden="true"] ~ #appcontent {
   margin-left: 0;
 }
 
@@ -176,9 +200,8 @@
 
 .tabbrowser-tab {
   width: 260px !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  max-height: 36px !important;
+  max-height: 36px;
+  min-height: 36px;
   margin: 0 !important;
   border: 0 !important;
   border-left: 2px solid transparent !important;
@@ -188,6 +211,30 @@
   -moz-box-flex: 0;
   -moz-box-pack: start;
   color: #333 !important;
+}
+
+.tabbrowser-tab.tab-hidden {
+  animation: var(--tab-animation-time) fade-out, var(--tab-animation-time) var(--tab-animation-time) slide-out;
+}
+
+.tabbrowser-tab.tab-visible {
+  animation: 300ms slide-fade-in;
+}
+
+@keyframes fade-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes slide-out {
+  0% { max-height: 36px; min-height: 36px; opacity: 0; }
+  100% { max-height: 0; min-height: 0; opacity: 0; }
+}
+
+@keyframes slide-fade-in {
+  0% { max-height: 0; min-height: 0; opacity: 0; }
+  50% { max-height: 36px; min-height: 36px; opacity: 0; }
+  100% { max-height: 36px; min-height: 36px; opacity: 1; }
 }
 
 .tabbrowser-tab[selected="true"],
@@ -323,12 +370,18 @@
   flex: 0 0 40px;
 }
 
-#TabsToolbar > toolbarbutton {
+#main-window[tabsintitlebar] #TabsToolbar {
+  padding: 0 !important;
+}
+
+#TabsToolbar > toolbarbutton,
+#TabsToolbar > toolbaritem {
   min-height: 100% !important;
+  display: none;
 }
 
 #TabsToolbar > #new-tab-button {
-  width: auto !important;
+  display: inline;
   padding: 0 5px !important;
   -moz-box-orient: horizontal !important;
 }
@@ -339,7 +392,7 @@
 }
 
 #TabsToolbar #new-tab-spacer {
-  flex: 1;
+  flex: 1 0 20px;
 }
 
 /* Tab toolbar styling */
@@ -464,7 +517,7 @@
   }
 
   #nav-bar {
-    margin-top:4px;
+    margin-top: 4px;
     margin-left: -130px;
     margin-right: 135px;
   }
