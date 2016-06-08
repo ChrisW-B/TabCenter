@@ -109,7 +109,7 @@ VerticalTabs.prototype = {
     }.bind(this);
 
     this.window.VerticalTabs = this;
-    this.removeTab = this.window.gBrowser.removeTab;
+    this._endRemoveTab = this.window.gBrowser._endRemoveTab;
     this.inferFromText = this.window.ToolbarIconColor.inferFromText;
     let AppConstants = this.AppConstants;
     let window = this.window;
@@ -149,7 +149,7 @@ VerticalTabs.prototype = {
     }.bind(this.window.ToolbarIconColor);
     this.unloaders.push(function () {
       this.window.ToolbarIconColor.inferFromText = this.inferFromText;
-      this.window.gBrowser.removeTab = this.removeTab;
+      this.window.gBrowser._endRemoveTab = this._endRemoveTab;
       this.window.BrowserOpenTab = this.BrowserOpenTab;
       delete this.window.VerticalTabs;
     });
@@ -162,6 +162,7 @@ VerticalTabs.prototype = {
 
     let tabs = this.document.getElementById('tabbrowser-tabs');
     let results = this.document.getElementById('PopupAutoCompleteRichResult');
+    let leftbox = this.document.getElementById('verticaltabs-box');
 
     if (results) {
       results.removeAttribute('width');
@@ -173,7 +174,7 @@ VerticalTabs.prototype = {
         if (mutation.type === 'attributes' &&
             mutation.target.localName === 'tab') {
           let tab = mutation.target;
-          if (mutation.attributeName === 'crop' && !tabs.expanded) {
+          if (mutation.attributeName === 'crop' && leftbox.getAttribute('expanded') !== 'true') {
             tab.removeAttribute('crop');
           }
         } else if (mutation.type === 'attributes' &&
@@ -181,7 +182,7 @@ VerticalTabs.prototype = {
                    mutation.attributeName === 'width') {
           results.removeAttribute('width');
         } else if (mutation.type === 'childList' &&
-            !tabs.expanded) {
+            leftbox.getAttribute('expanded') !== 'true') {
           for (let node of mutation.addedNodes) {
             node.removeAttribute('crop');
           }
@@ -233,6 +234,16 @@ VerticalTabs.prototype = {
     let label = tabs.firstChild.label;
     let palette = top.palette;
 
+    // Save the position of the tabs in the toolbar, for later restoring.
+    let toolbar = document.getElementById('TabsToolbar');
+    let tabsIndex = 0;
+    for (let i = 0; i < toolbar.children.length; i++) {
+      if (toolbar.children[i] === tabs) {
+        tabsIndex = i;
+        break;
+      }
+    }
+
     contentbox.insertBefore(top, contentbox.firstChild);
 
     // Create a box next to the app content. It will hold the tab
@@ -256,7 +267,6 @@ VerticalTabs.prototype = {
     top.palette = palette;
 
     // Move the tabs toolbar into the tab strip
-    let toolbar = document.getElementById('TabsToolbar');
     toolbar.setAttribute('collapsed', 'false'); // no more vanishing new tab toolbar
     toolbar._toolbox = null; // reset value set by constructor
     toolbar.setAttribute('toolboxid', 'navigator-toolbox');
@@ -278,11 +288,15 @@ VerticalTabs.prototype = {
     toolbar.appendChild(pin_button);
     leftbox.insertBefore(toolbar, leftbox.firstChild);
 
+    // change the text in the tab context box
+    let close_next_tabs_message = document.getElementById('context_closeTabsToTheEnd');
+    close_next_tabs_message.setAttribute('label', 'Close Tabs Below');
+
     let enter = (event) => {
-      if (event.type === 'mouseenter' && !tabs.expanded) {
+      if (event.type === 'mouseenter' && leftbox.getAttribute('expanded') !== 'true') {
         this.stats.tab_center_expanded++;
+        leftbox.setAttribute('expanded', 'true');
       }
-      tabs.expanded = true;
       if (event.pageX <= 4) {
         leftbox.style.transition = 'box-shadow 150ms ease-out, width 150ms ease-out';
         window.setTimeout(() => {
@@ -299,7 +313,7 @@ VerticalTabs.prototype = {
     leftbox.addEventListener('mousemove', enter);
     leftbox.addEventListener('mouseleave', () => {
       if (mainWindow.getAttribute('tabspinned') !== 'true') {
-        tabs.expanded = false;
+        leftbox.removeAttribute('expanded');
         let tabsPopup = document.getElementById('alltabs-popup');
         if (tabsPopup.state === 'open') {
           tabsPopup.hidePopup();
@@ -314,7 +328,7 @@ VerticalTabs.prototype = {
     tabs.addEventListener('TabUnpinned', this, false);
     window.setTimeout(() => {
       if (mainWindow.getAttribute('tabspinned') === 'true') {
-        tabs.expanded = true;
+        leftbox.setAttribute('expanded', 'true');
       }
       for (let i = 0; i < tabs.childNodes.length; i++) {
         this.initTab(tabs.childNodes[i]);
@@ -335,6 +349,18 @@ VerticalTabs.prototype = {
       top.palette = palette;
     });
 
+    let tab_context_menu = document.getElementById('tabContextMenu');
+
+    tab_context_menu.addEventListener('mouseover', function () {
+      leftbox.setAttribute('expanded', 'true');
+    });
+
+    tab_context_menu.addEventListener('mouseout', function () {
+      if (mainWindow.getAttribute('tabspinned') !== 'true') {
+        leftbox.removeAttribute('expanded');
+      }
+    });
+
     this.unloaders.push(function () {
       // Move the tabs toolbar back to where it was
       toolbar._toolbox = null; // reset value set by constructor
@@ -345,7 +371,6 @@ VerticalTabs.prototype = {
       let toolbox = document.getElementById('navigator-toolbox');
       let navbar = document.getElementById('nav-bar');
       let browserPanel = document.getElementById('browser-panel');
-      let new_tab_button = document.getElementById('new-tab-button');
 
       //remove customization event listeners which move the toolbox
       window.removeEventListener('beforecustomization');
@@ -380,7 +405,7 @@ VerticalTabs.prototype = {
       leftbox = null;
 
       // Restore the tab strip.
-      toolbar.insertBefore(tabs, new_tab_button);
+      toolbar.insertBefore(tabs, toolbar.children[tabsIndex]);
       toolbox.insertBefore(toolbar, navbar);
       browserPanel.insertBefore(toolbox, browserPanel.firstChild);
       browserPanel.insertBefore(bottom, document.getElementById('fullscreen-warning').nextSibling);
@@ -427,7 +452,7 @@ VerticalTabs.prototype = {
       aTab.setAttribute('crop', 'end');
     }
 
-    this.window.gBrowser.removeTab = (aTab) => {
+    this.window.gBrowser._endRemoveTab = (aTab) => {
       aTab.classList.remove('tab-visible');
       aTab.classList.add('tab-hidden');
       aTab.addEventListener('animationend', (e) => {
@@ -435,7 +460,7 @@ VerticalTabs.prototype = {
           let tabStack = this.document.getAnonymousElementByAttribute(aTab, 'class', 'tab-stack');
           tabStack.collapsed = true; //there is a visual jump if we do not collapse the tab before the end of the animation
         } else if (e.animationName === 'slide-out') {
-          this.removeTab.bind(this.window.gBrowser)(aTab);
+          this._endRemoveTab.bind(this.window.gBrowser)(aTab);
         }
       });
     };
