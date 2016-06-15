@@ -114,6 +114,23 @@ VerticalTabs.prototype = {
     let AppConstants = this.AppConstants;
     let window = this.window;
     let document = this.document;
+
+    window.addEventListener('animationend', (e) => {
+      let tab = e.target;
+      if (e.animationName === 'slide-fade-in') {
+        tab.classList.remove('tab-visible');
+      } else if (e.animationName === 'fade-out') {
+        let tabStack = this.document.getAnonymousElementByAttribute(tab, 'class', 'tab-stack');
+        tabStack.collapsed = true; //there is a visual jump if we do not collapse the tab before the end of the animation
+      } else if (e.animationName === 'slide-out') {
+        this._endRemoveTab.bind(this.window.gBrowser)(tab);
+      }
+    });
+
+    window.gBrowser._endRemoveTab = (aTab) => {
+      aTab.classList.add('tab-hidden');
+    };
+
     window.ToolbarIconColor.inferFromText = function () {
       if (!this._initialized){
         return;
@@ -176,6 +193,8 @@ VerticalTabs.prototype = {
           let tab = mutation.target;
           if (mutation.attributeName === 'crop' && leftbox.getAttribute('expanded') !== 'true') {
             tab.removeAttribute('crop');
+          } else if (mutation.attributeName === 'selected' && tab.getAttribute('visuallyselected') !== 'true'){
+            this.checkScrollToTab(tab);
           }
         } else if (mutation.type === 'attributes' &&
                    mutation.target.id === 'PopupAutoCompleteRichResult' &&
@@ -322,7 +341,6 @@ VerticalTabs.prototype = {
     });
 
     tabs.addEventListener('TabOpen', this, false);
-    tabs.addEventListener('TabSelect', this, false);
     tabs.addEventListener('TabClose', this, false);
     tabs.addEventListener('TabPinned', this, false);
     tabs.addEventListener('TabUnpinned', this, false);
@@ -383,7 +401,6 @@ VerticalTabs.prototype = {
       tabs.tabbox.orient = 'vertical'; // probably not necessary
       tabs.removeAttribute('width');
       tabs.removeEventListener('TabOpen', this, false);
-      tabs.removeEventListener('TabSelect', this, false);
       tabs.removeEventListener('TabClose', this, false);
       tabs.removeEventListener('TabPinned', this, false);
       tabs.removeEventListener('TabUnpinned', this, false);
@@ -451,25 +468,24 @@ VerticalTabs.prototype = {
     } else {
       aTab.setAttribute('crop', 'end');
     }
-
-    this.window.gBrowser._endRemoveTab = (aTab) => {
-      aTab.classList.remove('tab-visible');
-      aTab.classList.add('tab-hidden');
-      aTab.addEventListener('animationend', (e) => {
-        if (e.animationName === 'fade-out') {
-          let tabStack = this.document.getAnonymousElementByAttribute(aTab, 'class', 'tab-stack');
-          tabStack.collapsed = true; //there is a visual jump if we do not collapse the tab before the end of the animation
-        } else if (e.animationName === 'slide-out') {
-          this._endRemoveTab.bind(this.window.gBrowser)(aTab);
-        }
-      });
-    };
   },
 
   unload: function () {
     this.unloaders.forEach(function (func) {
       func.call(this);
     }, this);
+  },
+
+  checkScrollToTab: function (tab) {
+    let elemTop = tab.getBoundingClientRect().top;
+    let elemBottom = tab.getBoundingClientRect().bottom;
+    let overTop = elemTop < 63;
+    let overBottom = elemBottom > this.window.innerHeight;
+    if (overTop) {
+      tab.scrollIntoView(true);
+    } else if (overBottom) {
+      tab.scrollIntoView(false);
+    }
   },
 
   /*** Event handlers ***/
@@ -497,23 +513,6 @@ VerticalTabs.prototype = {
     case 'popupshowing':
       this.onPopupShowing(aEvent);
       return;
-    case 'TabSelect':
-      this.onTabSelect(aEvent);
-      return;
-    }
-  },
-
-  onTabSelect: function (aEvent) {
-    let tab = aEvent.target;
-    let elemTop = tab.getBoundingClientRect().top;
-    let elemBottom = tab.getBoundingClientRect().bottom;
-    let overTop = elemTop < 63;
-    let overBottom = elemBottom > this.window.innerHeight;
-
-    if (overTop) {
-      tab.scrollIntoView(true);
-    } else if (overBottom) {
-      tab.scrollIntoView(false);
     }
   },
 
