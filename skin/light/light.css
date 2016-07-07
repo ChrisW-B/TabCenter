@@ -161,14 +161,7 @@
   margin-left: 30px;
 }
 
-#sidebar-box {
-  margin-left: 30px;
-}
-
-#main-window[tabspinned="true"] #sidebar-box {
-  margin-left: 260px;
-}
-
+#main-window[tabspinned="true"] #sidebar-box,
 #main-window[tabspinned="true"] #sidebar-box[hidden="true"] ~ #appcontent,
 #main-window[tabspinned="true"] #sidebar-box[hidden="true"] ~ #PopupAutoCompleteRichResult {
   margin-left: 0;
@@ -189,27 +182,27 @@
 #PopupAutoCompleteRichResult {
   width: calc(100vw - 30px);
 }
-
 .browserContainer{
   margin-bottom:-5px!important;
 }
-
-#main-window[sizemode="normal"] #PopupAutoCompleteRichResult {
-  margin-left: -62px !important;
-}
-#main-window[inFullscreen] #PopupAutoCompleteRichResult {
+#PopupAutoCompleteRichResult {
   margin-left: -32px !important;
 }
 
-#main-window[tabspinned="true"] #verticaltabs-box + #appcontent #navigator-toolbox,
-#main-window[tabspinned="true"] #verticaltabs-box + #appcontent .browserContainer,
-#main-window[tabspinned="true"] #PopupAutoCompleteRichResult {
+#main-window[tabspinned="true"][sizemode="fullscreen"] #verticaltabs-box + #appcontent #navigator-toolbox,
+#main-window[tabspinned="true"][sizemode="fullscreen"] #verticaltabs-box + #appcontent .browserContainer,
+#main-window[tabspinned="true"][sizemode="fullscreen"] #PopupAutoCompleteRichResult {
   width: calc(100vw - var(--pinned-width));
 }
 
-#main-window[inFullscreen][inDOMFullscreen] .browserContainer {
-  margin-top: -1px;
+#main-window[inFullscreen][inDOMFullscreen] .browserContainer
+#main-window[inFullscreen][inDOMFullscreen] #PopupAutoCompleteRichResult {
+  width: 100vw !important;
 }
+
+/* #main-window[inFullscreen][inDOMFullscreen] .browserContainer {
+  margin-top: -1px;
+} */
 
 .tabbrowser-tab {
   width: 260px !important;
@@ -482,15 +475,15 @@
   background-image: none !important;
 }
 
-<<<<<<< HEAD
+
 #nav-bar{
   margin-left:-100px;
 }
 #urlbar-container{
   margin-left: 130px;
 }
-#main-window[tabspinned="true"] #nav-bar {
-  margin-left:-260px;
+#main-window[tabspinned="true"][sizemode="normal"] #nav-bar {
+   margin-left: calc( -3px - var(--pinned-width));
 }
 #main-window[tabspinned="true"] #urlbar-container{
   margin-left: 60px;
