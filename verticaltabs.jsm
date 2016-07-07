@@ -101,19 +101,19 @@ function VerticalTabs(window, {newPayload, addPingStats, AppConstants, setDefaul
 VerticalTabs.prototype = {
 
   init: function () {
-    this.BrowserOpenTab = this.window.BrowserOpenTab;
-    this.window.BrowserOpenTab = function () {
-      this.pushToTop = true;
-      this.window.openUILinkIn(this.window.BROWSER_NEW_TAB_URL, 'tab');
-      this.pushToTop = false;
-    }.bind(this);
-
     this.window.VerticalTabs = this;
     this._endRemoveTab = this.window.gBrowser._endRemoveTab;
     this.inferFromText = this.window.ToolbarIconColor.inferFromText;
     let AppConstants = this.AppConstants;
     let window = this.window;
     let document = this.document;
+
+    this.BrowserOpenTab = this.window.BrowserOpenTab;
+    this.window.BrowserOpenTab = function () {
+      this.pushToTop = Services.prefs.getBoolPref('extensions.verticaltabs.opentabstop');
+      this.window.openUILinkIn(this.window.BROWSER_NEW_TAB_URL, 'tab');
+      this.pushToTop = false;
+    }.bind(this);
 
     window.addEventListener('animationend', (e) => {
       let tab = e.target;
@@ -269,9 +269,42 @@ VerticalTabs.prototype = {
     // bar and the tab toolbar.
     let browserbox = document.getElementById('browser');
     let leftbox = this.createElement('vbox', {'id': 'verticaltabs-box'});
+    let splitter = this.createElement('vbox', {'id': 'verticaltabs-splitter'});
     browserbox.insertBefore(leftbox, contentbox);
+    browserbox.insertBefore(splitter, browserbox.firstChild);
     mainWindow.setAttribute('persist',
-      mainWindow.getAttribute('persist') + ' tabspinned');
+      mainWindow.getAttribute('persist') + ' tabspinned tabspinnedwidth');
+
+    this.pinnedWidth = +mainWindow.getAttribute('tabspinnedwidth').replace('px', '') ||
+                       +window.getComputedStyle(document.documentElement)
+                              .getPropertyValue('--pinned-width').replace('px', '');
+    document.documentElement.style.setProperty('--pinned-width', `${this.pinnedWidth}px`);
+
+    splitter.addEventListener('mousedown', (event) => {
+      let initialX = event.screenX - this.pinnedWidth;
+      let mousemove = (event) => {
+        // event.preventDefault();
+        let xDelta = event.screenX - initialX;
+        this.pinnedWidth = xDelta;
+        if (this.pinnedWidth < 30) {
+          this.pinnedWidth = 30;
+        }
+        if (this.pinnedWidth > document.width / 2) {
+          this.pinnedWidth = document.width / 2;
+        }
+        document.documentElement.style.setProperty('--pinned-width', `${this.pinnedWidth}px`);
+        mainWindow.setAttribute('tabspinnedwidth', `${this.pinnedWidth}px`);
+      };
+
+      let mouseup = (event) => {
+        document.removeEventListener('mousemove', mousemove);
+        document.removeEventListener('mouseup', mouseup);
+      };
+
+      document.addEventListener('mousemove', mousemove);
+      document.addEventListener('mouseup', mouseup);
+    });
+
 
     // Move the tabs next to the app content, make them vertical,
     // and restore their width from previous session
@@ -415,8 +448,10 @@ VerticalTabs.prototype = {
 
       // Remove all the crap we added.
       browserbox.removeChild(leftbox);
+      browserbox.removeChild(splitter);
       browserbox.removeAttribute('dir');
       mainWindow.removeAttribute('tabspinned');
+      mainWindow.removeAttribute('tabspinnedwidth');
       mainWindow.setAttribute('persist',
         mainWindow.getAttribute('persist').replace(' tabspinnned', ''));
       leftbox = null;

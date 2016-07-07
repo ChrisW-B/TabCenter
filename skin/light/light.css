@@ -1,7 +1,8 @@
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
 :root {
-  --tab-animation-time: 150ms;
+  --tab-animation-time:150ms;
+  --pinned-width:260px;
 }
 
 #main-window[privatebrowsingmode="temporary"] #titlebar-buttonbox-container {
@@ -9,6 +10,7 @@
 }
 
 .tabbrowser-tabs {
+  overflow-x: hidden;
   overflow-y: hidden;
   box-sizing: border-box;
   margin: 0 !important;
@@ -34,13 +36,6 @@
 
 .tabbrowser-arrowscrollbox:not(:-moz-lwtheme) {
   height: calc(100vh - 41px);
-}
-
-@media (-moz-os-version: windows-xp), (-moz-os-version: windows-vista), (-moz-os-version: windows-win7), (-moz-os-version: windows-win8), (-moz-os-version: windows-win10) {
-  .tabbrowser-arrowscrollbox,
-  .tabbrowser-arrowscrollbox:not(:-moz-lwtheme) {
-    height: calc(100vh - 42px);
-  }
 }
 
 #verticaltabs-box .tabbrowser-arrowscrollbox > scrollbox {
@@ -99,8 +94,24 @@
   transition-delay: 0.75s; /*allow waiting before expansion*/
 }
 
+#verticaltabs-splitter {
+  display: none;
+  margin-left: var(--pinned-width);
+  min-width: 3px !important;
+  width: 3px;
+  cursor: ew-resize;
+}
+
+#main-window[tabspinned="true"] #verticaltabs-splitter {
+  display: -moz-box;
+}
+
+#main-window[inFullscreen][inDOMFullscreen] #verticaltabs-splitter {
+  display: none;
+}
+
 #main-window[tabspinned="true"] #verticaltabs-box {
-  width: 260px;
+  width: var(--pinned-width);
   box-shadow: none;
   transition: box-shadow 0ms ease-in-out 0ms;
 }
@@ -111,6 +122,7 @@
 
 #TabsToolbar > #pin-button {
   width: 40px;
+  min-width: 40px;
   margin: 0 !important;
   border: none !important;
   display: -moz-box;
@@ -125,7 +137,7 @@
   background-image: url("resource://tabcenter/skin/pin-hover.png");
 }
 
-#TabsToolbar[brighttext] #pin-button {
+#main-window[lwthemetextcolor="bright"] #TabsToolbar[brighttext] #pin-button {
   background-image: url("resource://tabcenter/skin/pin-hover.png");
 }
 
@@ -143,22 +155,16 @@
   margin-bottom:5px;
 }
 
+#sidebar-box,
 #sidebar-box[hidden="true"] ~ #appcontent,
 #sidebar-box[hidden="true"] ~ #PopupAutoCompleteRichResult {
   margin-left: 30px;
 }
 
-#sidebar-box {
-  margin-left: 30px;
-}
-
+#main-window[tabspinned="true"] #sidebar-box,
 #main-window[tabspinned="true"] #sidebar-box[hidden="true"] ~ #appcontent,
 #main-window[tabspinned="true"] #sidebar-box[hidden="true"] ~ #PopupAutoCompleteRichResult {
-  margin-left: 260px;
-}
-
-#main-window[tabspinned="true"] #sidebar-box {
-  margin-left: 260px;
+  margin-left: 0;
 }
 
 #main-window[chromehidden*="toolbar"] #appcontent,
@@ -176,27 +182,27 @@
 #PopupAutoCompleteRichResult {
   width: calc(100vw - 30px);
 }
-
 .browserContainer{
   margin-bottom:-5px!important;
 }
-
-#main-window[sizemode="normal"] #PopupAutoCompleteRichResult {
-  margin-left: -62px !important;
-}
-#main-window[inFullscreen] #PopupAutoCompleteRichResult {
+#PopupAutoCompleteRichResult {
   margin-left: -32px !important;
 }
 
-#main-window[tabspinned="true"] #verticaltabs-box + #appcontent #navigator-toolbox,
-#main-window[tabspinned="true"] #verticaltabs-box + #appcontent .browserContainer,
-#main-window[tabspinned="true"] #PopupAutoCompleteRichResult {
-  width: calc(100vw - 260px);
+#main-window[tabspinned="true"][sizemode="fullscreen"] #verticaltabs-box + #appcontent #navigator-toolbox,
+#main-window[tabspinned="true"][sizemode="fullscreen"] #verticaltabs-box + #appcontent .browserContainer,
+#main-window[tabspinned="true"][sizemode="fullscreen"] #PopupAutoCompleteRichResult {
+  width: calc(100vw - var(--pinned-width));
 }
 
-#main-window[inFullscreen][inDOMFullscreen] .browserContainer {
-  margin-top: -1px;
+#main-window[inFullscreen][inDOMFullscreen] .browserContainer
+#main-window[inFullscreen][inDOMFullscreen] #PopupAutoCompleteRichResult {
+  width: 100vw !important;
 }
+
+/* #main-window[inFullscreen][inDOMFullscreen] .browserContainer {
+  margin-top: -1px;
+} */
 
 .tabbrowser-tab {
   width: 260px !important;
@@ -211,6 +217,10 @@
   -moz-box-flex: 0;
   -moz-box-pack: start;
   color: #333 !important;
+}
+
+#main-window[tabspinned="true"] .tabbrowser-tab {
+  width: var(--pinned-width) !important;
 }
 
 .tabbrowser-tab.tab-hidden {
@@ -367,12 +377,9 @@
 }
 
 #TabsToolbar {
+  padding: 0 !important;
   display: flex;
   flex: 0 0 40px;
-}
-
-#main-window[tabsintitlebar] #TabsToolbar {
-  padding: 0 !important;
 }
 
 #TabsToolbar > toolbarbutton,
@@ -468,14 +475,15 @@
   background-image: none !important;
 }
 
+
 #nav-bar{
   margin-left:-100px;
 }
 #urlbar-container{
   margin-left: 130px;
 }
-#main-window[tabspinned="true"] #nav-bar {
-  margin-left:-260px;
+#main-window[tabspinned="true"][sizemode="normal"] #nav-bar {
+   margin-left: calc( -3px - var(--pinned-width));
 }
 #main-window[tabspinned="true"] #urlbar-container{
   margin-left: 60px;
@@ -536,4 +544,25 @@
 
 #alltabs-button, #new-tab-button .toolbarbutton-text{
   display: none!important;
+}
+
+@media (-moz-os-version: windows-win8) {
+  .tabbrowser-arrowscrollbox,
+  .tabbrowser-arrowscrollbox:not(:-moz-lwtheme) {
+    height: calc(100vh - 46px);
+  }
+}
+
+@media (-moz-os-version: windows-win7) {
+  .tabbrowser-arrowscrollbox,
+  .tabbrowser-arrowscrollbox:not(:-moz-lwtheme) {
+    height: calc(100vh - 44px);
+  }
+}
+
+/* win10 needs to be 1 px smaller*/
+@media (-moz-os-version: windows-win10) {
+  #TabsToolbar {
+    flex: 0 0 39px;
+  }
 }
