@@ -42,6 +42,9 @@ Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://tabcenter/tabdatastore.jsm');
 Components.utils.import('resource://tabcenter/multiselect.jsm');
 
+//use to set preview image as metadata image 1/4
+// Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+
 const EXPORTED_SYMBOLS = ['VerticalTabs', 'vtInit'];
 
 const NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
@@ -65,9 +68,10 @@ function vtInit() {
 
   installStylesheet('resource://tabcenter/override-bindings.css');
   installStylesheet('resource://tabcenter/skin/base.css');
-  installStylesheet('resource://tabcenter/skin/light/light.css');
+  installStylesheet('chrome://tabcenter/skin/platform.css');
+
   return () => {
-    removeStylesheet('resource://tabcenter/skin/light/light.css');
+    removeStylesheet('chrome://tabcenter/skin/platform.css');
     removeStylesheet('resource://tabcenter/override-bindings.css');
     removeStylesheet('resource://tabcenter/skin/base.css');
     let windows = Services.wm.getEnumerator(null);
@@ -124,6 +128,7 @@ VerticalTabs.prototype = {
         tabStack.collapsed = true; //there is a visual jump if we do not collapse the tab before the end of the animation
       } else if (e.animationName === 'slide-out') {
         this._endRemoveTab.bind(this.window.gBrowser)(tab);
+        this.resizeTabs();
       }
     });
 
@@ -294,6 +299,8 @@ VerticalTabs.prototype = {
         }
         document.documentElement.style.setProperty('--pinned-width', `${this.pinnedWidth}px`);
         mainWindow.setAttribute('tabspinnedwidth', `${this.pinnedWidth}px`);
+        this.resizeFindInput();
+        this.resizeTabs();
       };
 
       let mouseup = (event) => {
@@ -322,8 +329,7 @@ VerticalTabs.prototype = {
     toolbar.setAttribute('collapsed', 'false'); // no more vanishing new tab toolbar
     toolbar._toolbox = null; // reset value set by constructor
     toolbar.setAttribute('toolboxid', 'navigator-toolbox');
-    let spacer = this.createElement('spacer', {'id': 'new-tab-spacer'});
-    toolbar.appendChild(spacer);
+
     let pin_button = this.createElement('toolbarbutton', {
       'id': 'pin-button',
       'tooltiptext': 'Keep sidebar open',
@@ -335,10 +341,34 @@ VerticalTabs.prototype = {
         } else {
           window.VerticalTabs.stats.tab_center_unpinned++;
         }
+        window.VerticalTabs.resizeFindInput();
+        window.VerticalTabs.resizeTabs();
         `
     });
+
     toolbar.appendChild(pin_button);
     leftbox.insertBefore(toolbar, leftbox.firstChild);
+    let find_input = this.createElement('textbox', {
+      'id': 'find-input',
+      'class': 'searchbar-textbox'
+    });
+    let search_icon = this.createElement('image', {
+      'id': 'tabs-search'
+    });
+    find_input.appendChild(search_icon);
+    find_input.addEventListener('input', this.filtertabs.bind(this));
+    this.window.addEventListener('keyup', (e) => {
+      if(e.keyCode === 27) {
+        this.clearFind();
+      }
+    });
+    document.getElementById('filler-tab').addEventListener('click', this.clearFind.bind(this));
+
+    let spacer = this.createElement('spacer', {'id': 'new-tab-spacer'});
+    toolbar.insertBefore(find_input, pin_button);
+    toolbar.insertBefore(spacer, pin_button);
+
+    this.resizeFindInput();
 
     // change the text in the tab context box
     let close_next_tabs_message = document.getElementById('context_closeTabsToTheEnd');
@@ -361,11 +391,13 @@ VerticalTabs.prototype = {
         }
       }, 300);
     };
+
     leftbox.addEventListener('mouseenter', enter);
     leftbox.addEventListener('mousemove', enter);
     leftbox.addEventListener('mouseleave', () => {
       if (mainWindow.getAttribute('tabspinned') !== 'true') {
         leftbox.removeAttribute('expanded');
+        this.clearFind();
         let tabsPopup = document.getElementById('alltabs-popup');
         if (tabsPopup.state === 'open') {
           tabsPopup.hidePopup();
@@ -400,6 +432,8 @@ VerticalTabs.prototype = {
       top.palette = palette;
     });
 
+    window.addEventListener('resize', this.resizeTabs.bind(this), false);
+
     let tab_context_menu = document.getElementById('tabContextMenu');
 
     tab_context_menu.addEventListener('mouseover', function () {
@@ -418,6 +452,7 @@ VerticalTabs.prototype = {
       toolbar.removeAttribute('toolboxid');
       toolbar.removeAttribute('collapsed');
       toolbar.removeChild(spacer);
+      toolbar.removeChild(find_input);
       toolbar.removeChild(pin_button);
       let toolbox = document.getElementById('navigator-toolbox');
       let navbar = document.getElementById('nav-bar');
@@ -465,6 +500,50 @@ VerticalTabs.prototype = {
     });
   },
 
+  resizeFindInput: function () {
+    let spacer = this.document.getElementById('new-tab-spacer');
+    let find_input = this.document.getElementById('find-input');
+    if (this.pinnedWidth > 190 || this.document.getElementById('main-window').getAttribute('tabspinned') !== 'true') {
+      spacer.style.visibility = 'collapse';
+      find_input.style.visibility = 'visible';
+    } else {
+      find_input.style.visibility = 'collapse';
+      spacer.style.visibility = 'visible';
+    }
+  },
+
+  clearFind: function () {
+    this.document.getElementById('find-input').value = '';
+    this.filtertabs();
+  },
+
+  filtertabs: function () {
+    let document = this.document;
+    let tabs = document.getElementById('tabbrowser-tabs');
+    let find_input = document.getElementById('find-input');
+    let input_value = find_input.value.toLowerCase();
+    let hidden_counter = 0;
+    let hidden_tab = document.getElementById('filler-tab');
+    let hidden_tab_label = hidden_tab.children[0];
+
+    for (let i = 0; i < tabs.children.length; i++) {
+      let tab = tabs.children[i];
+      if (tab.label.toLowerCase().match(input_value) || tab.linkedBrowser.currentURI.spec.toLowerCase().match(input_value)) {
+        tab.setAttribute('hidden', false);
+      } else {
+        hidden_counter += 1;
+        tab.setAttribute('hidden', true);
+      }
+    }
+    if (hidden_counter > 0) {
+      hidden_tab_label.setAttribute('value', `${hidden_counter} more tab${hidden_counter > 1 ? 's' : ''}...`);
+      hidden_tab.removeAttribute('hidden');
+    } else {
+      hidden_tab.setAttribute('hidden', 'true');
+    }
+    this.resizeTabs();
+  },
+
   initContextMenu: function () {
     const document = this.document;
     const tabs = document.getElementById('tabbrowser-tabs');
@@ -491,18 +570,35 @@ VerticalTabs.prototype = {
   },
 
   initTab: function (aTab) {
+    let document = this.document;
     if (this.pushToTop) {
       this.window.gBrowser.moveTabTo(aTab, 0);
     }
+    let find_input = this.document.getElementById('find-input');
+    find_input.value = '';
+    find_input.dispatchEvent(new Event('input'));
+
+    this.resizeTabs();
 
     aTab.classList.add('tab-visible');
     aTab.classList.remove('tab-hidden');
 
-    if (this.document.getElementById('main-window').getAttribute('tabspinned') !== 'true') {
+    if (document.getElementById('main-window').getAttribute('tabspinned') !== 'true') {
       aTab.removeAttribute('crop');
     } else {
       aTab.setAttribute('crop', 'end');
     }
+
+    aTab.addEventListener('load', function () {
+      let tab_address = aTab.linkedBrowser.currentURI.spec;
+      //use to set preview image as metadata image 2/4
+      // document.getAnonymousElementByAttribute(aTab, 'anonid', 'tab-meta-image').style.backgroundImage = `url(${this.getPageMetaDataImage(aTab)}`;
+
+      //use to set preview image as screenshot
+      document.getAnonymousElementByAttribute(aTab, 'anonid', 'tab-meta-image').style.backgroundImage = `url(moz-page-thumb://thumbnail/?url=${encodeURIComponent(tab_address)}), url(resource://tabcenter/skin/blank.png)`;
+
+      document.getAnonymousElementByAttribute(aTab, 'anonid', 'address-label').value = tab_address;
+    }.bind(this));
   },
 
   unload: function () {
@@ -522,6 +618,23 @@ VerticalTabs.prototype = {
       tab.scrollIntoView(false);
     }
   },
+
+  resizeTabs: function () {
+    let tabs = this.document.getElementById('tabbrowser-tabs');
+    let tabbrowser_height = tabs.clientHeight;
+    let number_of_tabs = this.document.querySelectorAll('.tabbrowser-tab[hidden=false]').length;
+    if (tabbrowser_height / number_of_tabs >= 58 && this.pinnedWidth > 60 ) {
+      tabs.classList.add('large-tabs');
+    } else {
+      tabs.classList.remove('large-tabs');
+    }
+  },
+
+  //use to set preview image as metadata image 3/4
+  // getPageMetaDataImage: function (aTab) {
+  //   var tabMeta = this.PageMetadata.getData(aTab.linkedBrowser.contentDocument);
+  //   return tabMeta['og:image'];
+  // },
 
   /*** Event handlers ***/
 
@@ -589,3 +702,6 @@ VerticalTabs.prototype = {
   }
 
 };
+
+//use to set preview image as metadata image 4/4
+// XPCOMUtils.defineLazyModuleGetter(VerticalTabs.prototype, "PageMetadata", "resource://gre/modules/PageMetadata.jsm");
