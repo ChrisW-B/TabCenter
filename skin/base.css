@@ -159,7 +159,6 @@
   left: 0;
   width: var(--collapsed-width);
   height: 100vh;
-  /* border-top: 1px solid rgb(160, 160, 160) !important; */
   border-right: 1px solid ThreeDShadow;
   display: flex;
   overflow-x: hidden;
