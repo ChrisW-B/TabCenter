@@ -51,7 +51,8 @@ Cu.import('resource://gre/modules/Services.jsm');
 
 const RESOURCE_HOST = 'tabcenter';
 const DEFAULT_PREFS = {
-  'browser.tabs.animate': false
+  'browser.tabs.animate': false,
+  'browser.tabs.drawInTitlebar': true
 };
 
 /**
@@ -85,7 +86,7 @@ function setDefaultPrefs() {
     if (ex.result === Components.results.NS_ERROR_UNEXPECTED) {
       Services.prefs.setBoolPref('extensions.verticaltabs.opentabstop', true);
     } else {
-      throw(ex);
+      throw (ex);
     }
   }
 }
@@ -133,7 +134,6 @@ function startup(data, reason) {
   }, 24 * 60 * 60 * 1000, Ci.nsITimer.TYPE_REPEATING_SLACK); // Every 24h.
   // }}, 20*1000, Ci.nsITimer.TYPE_REPEATING_SLACK);  // Every 20s for debugging.
 }
-
 
 function shutdown(data, reason) {
   sendPing();
