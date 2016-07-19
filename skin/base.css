@@ -427,7 +427,7 @@
 .tabbrowser-tab[selected="true"],
 .tabbrowser-tab[multiselect="true"] {
   margin: 0 !important;
-  border-left: 4px solid #ff9500 !important;
+  border-left: 2px solid #ff9500 !important;
   border-radius: 0 !important;
   background-color: #dadada !important;
   font-weight: normal;
@@ -687,4 +687,17 @@
 }
 #alltabs-button, #new-tab-button .toolbarbutton-text{
   display: none!important;
+}
+
+/* Handle attention tabs */
+.tabbrowser-tab[attention] {
+  background-image: radial-gradient(22px at left center, #0996f8 19%, transparent 22%) !important;
+  background-position: -2px center !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% !important;
+  border-left: 2px solid #0996f8 !important;
+}
+
+.tabbrowser-tab > .tab-stack > .tab-content[attention] {
+  background-image: none !important;
 }
