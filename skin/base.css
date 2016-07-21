@@ -5,6 +5,7 @@
   --collapsed-width:30px;
   --pinned-width:260px;
   --link-color:#00aff7;
+  --link-color-brighttext:#2cc1ff;
 }
 
 /* Style the scrollbox for vertical arrangements. */
@@ -184,7 +185,8 @@
 #verticaltabs-splitter {
   display: none;
   margin-left: var(--pinned-width);
-  min-width: 2px !important;
+  max-width: 2px;
+  min-width: 2px;
   width: 2px;
   cursor: ew-resize;
 }
@@ -469,6 +471,10 @@
   font-weight: 400 !important;
 }
 
+#verticaltabs-box[brighttext] .title-wrapper .address-label {
+  color: var(--link-color-brighttext);
+}
+
 #verticaltabs-box[brighttext] .tabbrowser-tab[selected="true"],
 #verticaltabs-box[brighttext] .tabbrowser-tab[multiselect="true"] {
   background-color: #3c4146 !important;
@@ -488,12 +494,17 @@
   display: -moz-box !important;
 }
 
-/* Keep the close button at a safe distance from the tab label. */
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-close-button {
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 0 32px 3px !important;
+}
 
+/* Keep the close button at a safe distance from the tab label. */
 .tab-close-button {
   display: -moz-box !important;
-  width: 40px;
-  height: 40px;
+  width: 40px !important;
+  height: 40px !important;
   margin: 0 0 0 3px !important;
   background: no-repeat center/16px url("resource://tabcenter/skin/stop.svg") !important;
 }
