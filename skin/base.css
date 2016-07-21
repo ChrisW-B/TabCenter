@@ -494,7 +494,7 @@
   display: -moz-box !important;
 }
 
-.tabbrowser-tabs.large-tabs .tab-close-button {
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-close-button {
   width: 24px !important;
   height: 24px !important;
   margin: 0 0 32px 3px !important;
