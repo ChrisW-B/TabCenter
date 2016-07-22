@@ -164,7 +164,9 @@
   display: flex;
   overflow-x: hidden;
   box-sizing: border-box;
-  background-color: #fbfbfb !important;
+  /* background-color: #fbfbfb !important; */
+  -moz-appearance: -moz-mac-vibrancy-light !important;
+
   flex-direction: column;
   transition: box-shadow 150ms ease-out 300ms, width 150ms ease-out 300ms;
 }
@@ -428,10 +430,11 @@
 
 .tabbrowser-tab[selected="true"],
 .tabbrowser-tab[multiselect="true"] {
-  margin: 0 !important;
+  /* margin: 0 !important; */
   border-left: 2px solid #ff9500 !important;
   border-radius: 0 !important;
-  background-color: #dadada !important;
+  background-color: #dadada60 !important;
+/*   -moz-appearance: -moz-mac-vibrancy-light !important; */
   font-weight: normal;
   font-weight: 600 !important;
   text-shadow: none;
@@ -450,8 +453,8 @@
 }
 
 .tabbrowser-tab:not([selected="true"]):hover {
-  margin: 0 !important;
-  background-color: #ebebeb !important;
+  /* margin: 0 !important; */
+  background-color: #ebebeb60 !important;
 }
 
 .tabbrowser-tab[pinned] .tab-close-button,
