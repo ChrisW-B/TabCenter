@@ -164,9 +164,7 @@
   display: flex;
   overflow-x: hidden;
   box-sizing: border-box;
-  /* background-color: #fbfbfb !important; */
   -moz-appearance: -moz-mac-vibrancy-light !important;
-
   flex-direction: column;
   transition: box-shadow 150ms ease-out 300ms, width 150ms ease-out 300ms;
 }
@@ -434,7 +432,6 @@
   border-left: 2px solid #ff9500 !important;
   border-radius: 0 !important;
   background-color: #dadada60 !important;
-/*   -moz-appearance: -moz-mac-vibrancy-light !important; */
   font-weight: normal;
   font-weight: 600 !important;
   text-shadow: none;
@@ -452,10 +449,10 @@
   border-left: 2px solid #0996f8 !important;
 }
 
-.tabbrowser-tab:not([selected="true"]):hover {
-  /* margin: 0 !important; */
+/* .tabbrowser-tab:not([selected="true"]):hover {
+  margin: 0 !important;
   background-color: #ebebeb60 !important;
-}
+} */
 
 .tabbrowser-tab[pinned] .tab-close-button,
 .tabbrowser-tab:not(:hover) .tab-close-button {
@@ -711,6 +708,15 @@
   background-size: 100% !important;
   border-left: 2px solid #0996f8 !important;
 }
+
+.tabbrowser-tab:after {
+    position: absolute !important;
+    right: -20px !important;
+    width: 100% !important;
+    border-bottom: 1px solid black !important;
+    content: ''!important;
+}
+
 
 .tabbrowser-tab > .tab-stack > .tab-content[attention] {
   background-image: none !important;
