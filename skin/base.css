@@ -173,7 +173,8 @@
   background-color: #333 !important;
 }
 
-#main-window[inFullscreen][inDOMFullscreen] #verticaltabs-box {
+#main-window[inFullscreen][inDOMFullscreen] #verticaltabs-box,
+#main-window[inFullscreen][inDOMFullscreen] #verticaltabs-splitter {
   visibility: collapse;
 }
 
@@ -245,7 +246,7 @@
 
 #tabs-search {
   -moz-image-region: rect(0, 20px, 20px, 0);
-  list-style-image: url("chrome://browser/skin/search-indicator.png");
+  list-style-image: url("resource://tabcenter/skin/find.svg");
 }
 
 #TabsToolbar #find-input .textbox-input-box {
@@ -360,6 +361,10 @@
 .title-wrapper .tab-text {
   margin-bottom: 2px !important;
   margin-top: 2px !important;
+  font-weight: 400;
+}
+
+.tabbrowser-tabs.large-tabs .tab-text {
   font-weight: 600;
 }
 

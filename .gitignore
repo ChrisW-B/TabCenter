@@ -1,6 +1,6 @@
 build
 *~
-skin/.DS_Store
+.DS_Store
 TabCenterTest.zip
 /node_modules/
 npm-debug.log
