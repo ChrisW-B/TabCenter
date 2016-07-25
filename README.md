@@ -1,3 +1,15 @@
+## Note:
+### This is a customized version of the addon, forked from the original, though I try to keep it up to date
+#### Customizations include:
+- Smaller sidebar (30px wide vs 45px)
+- Navbar in titlebar
+- Only show tab previews when pinned
+- More native feel on MacOS, styled after iMessage
+- Fixes for "attention" tabs, such as those sent from another computer
+
+
+
+##### Original README begins:
 # TabCenter <a href="http://testpilot.dev.mozaws.net/experiments/tabcenter"><img align="right" src="https://img.shields.io/badge/available_on-Test_Pilot-0996F8.svg"></a>
 
 
