@@ -1,5 +1,26 @@
 /*Only Mac Styles*/
 
+
+/* Shuffle things around so title bar isn't needed */
+#main-window[sizemode="normal"] #urlbar-container {
+  margin-left:30px;
+}
+
+#main-window[sizemode="normal"] #verticaltabs-box{
+  margin-top:40px;
+}
+
+#main-window[tabspinned="true"][sizemode="normal"] #urlbar-container{
+  margin-left: 60px;
+}
+
+/* Make sidebar look more MacOS native */
+
+#verticaltabs-box {
+	background-color:transparent;
+	-moz-appearance: -moz-mac-vibrancy-light !important;
+}
+
 .tabbrowser-tab[selected="true"],
 .tabbrowser-tab[multiselect="true"] {
   border-left: 2px solid transparent !important;
