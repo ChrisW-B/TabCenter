@@ -688,10 +688,6 @@
 #verticaltabs-box {
   top:-1px;
 }
-#main-window[tabspinned="true"][sizemode="normal"] #nav-bar {
-   margin-left: calc( -3px - var(--pinned-width));
-}
-
 
 #alltabs-button, #new-tab-button .toolbarbutton-text{
   display: none!important;
@@ -705,7 +701,6 @@
   background-size: 100% !important;
   border-left: 2px solid #0996f8 !important;
 }
-
 
 .tabbrowser-tab > .tab-stack > .tab-content[attention] {
   background-image: none !important;
