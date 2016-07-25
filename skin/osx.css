@@ -1,1 +1,51 @@
 /*Only Mac Styles*/
+
+.tabbrowser-tab[selected="true"],
+.tabbrowser-tab[multiselect="true"] {
+  border-left: 2px solid transparent !important;
+  border-radius: 0 !important;
+  background-color: rgb(62, 146, 249) !important;
+  color:white!important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-text.address-label {
+  color:white!important;
+}
+
+.tabbrowser-tab:not([selected="true"]):hover {
+  background-color: transparent !important;
+}
+
+.tabbrowser-tabs{
+	border-top:none;
+}
+
+.tabbrowser-tab::after {
+  content: '\00a0' !important;
+  position: absolute !important;
+  left: 20px !important;
+  width: 100% !important;
+  line-height: 35px !important;
+  background:rgba(255,0,0,0.0)!important;
+  border-top: 1px solid black !important;
+  z-index:-999999999;
+}
+.tabbrowser-tab:first-child::after {
+  border-top:1px solid transparent!important;
+}
+.tabbrowser-tab:last-child::after {
+  border-bottom:1px solid black !important;
+}
+
+.tabbrowser-tab[selected="true"]::after{
+  border-top:1px solid transparent!important;
+  border-bottom:1px solid transparent!important;
+}
+
+.tabbrowser-tab[selected="true"] + *::after {
+   border-top:1px solid transparent!important;
+}
+
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tabbrowser-tab::after {
+  line-height: 55px !important;
+}

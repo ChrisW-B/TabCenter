@@ -73,7 +73,6 @@
   min-width: 30px !important;
   max-width: 100% !important;
   pointer-events: auto !important;
-  border-bottom: 1px solid transparent;
 }
 
 .tabbrowser-arrowscrollbox > .arrowscrollbox-scrollbox {
@@ -116,6 +115,7 @@
   box-sizing: border-box;
   margin: 0 !important;
   padding: 0 !important;
+  border-top: 1px solid rgba(160, 160, 160, 0.5);
   flex: 1 0;
 }
 
@@ -433,18 +433,12 @@
 
 .tabbrowser-tab[selected="true"],
 .tabbrowser-tab[multiselect="true"] {
-  /* margin: 0 !important; */
-  border-left: 2px solid transparent !important;
+  border-left: 2px solid #ff9500 !important;
   border-radius: 0 !important;
-  background-color: rgb(62, 146, 249) !important;
+  background-color: #dadada !important;
   font-weight: normal;
   font-weight: 600 !important;
   text-shadow: none;
-  color:white!important;
-}
-
-.tabbrowser-tab[selected="true"] .tab-text.address-label {
-  color:white!important;
 }
 
 .tabbrowser-tab[selected="true"]:-moz-window-inactive,
@@ -459,10 +453,9 @@
   border-left: 2px solid #0996f8 !important;
 }
 
-/* .tabbrowser-tab:not([selected="true"]):hover {
-  margin: 0 !important;
-  background-color: rgb(206, 206, 206) !important;
-} */
+.tabbrowser-tab:not([selected="true"]):hover {
+  background-color: #ebebeb !important;
+}
 
 .tabbrowser-tab[pinned] .tab-close-button,
 .tabbrowser-tab:not(:hover) .tab-close-button {
@@ -717,36 +710,6 @@
   background-repeat: no-repeat !important;
   background-size: 100% !important;
   border-left: 2px solid #0996f8 !important;
-}
-
-.tabbrowser-tab::after {
-  content: '\00a0' !important;
-  position: absolute !important;
-  left: 20px !important;
-  width: 100% !important;
-  line-height: 35px !important;
-  background:rgba(255,0,0,0.0)!important;
-  border-top: 1px solid black !important;
-  z-index:-999999999;
-}
-.tabbrowser-tab:first-child::after {
-  border-top:1px solid transparent!important;
-}
-.tabbrowser-tab:last-child::after {
-  border-bottom:1px solid black !important;
-}
-
-.tabbrowser-tab[selected="true"]::after{
-  border-top:1px solid transparent!important;
-  border-bottom:1px solid transparent!important;
-}
-
-.tabbrowser-tab[selected="true"] + *::after {
-   border-top:1px solid transparent!important;
-}
-
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tabbrowser-tab::after {
-  line-height: 55px !important;
 }
 
 
