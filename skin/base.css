@@ -164,7 +164,7 @@
   display: flex;
   overflow-x: hidden;
   box-sizing: border-box;
-  -moz-appearance: -moz-mac-vibrancy-light !important;
+  background-color:#fbfbfb;
   flex-direction: column;
   transition: box-shadow 150ms ease-out 300ms, width 150ms ease-out 300ms;
 }
@@ -173,7 +173,8 @@
   background-color: #333 !important;
 }
 
-#main-window[inFullscreen][inDOMFullscreen] #verticaltabs-box {
+#main-window[inFullscreen][inDOMFullscreen] #verticaltabs-box,
+#main-window[inFullscreen][inDOMFullscreen] #verticaltabs-splitter {
   visibility: collapse;
 }
 
@@ -245,7 +246,7 @@
 
 #tabs-search {
   -moz-image-region: rect(0, 20px, 20px, 0);
-  list-style-image: url("chrome://browser/skin/search-indicator.png");
+  list-style-image: url("resource://tabcenter/skin/find.svg");
 }
 
 #TabsToolbar #find-input .textbox-input-box {
@@ -360,6 +361,10 @@
 .title-wrapper .tab-text {
   margin-bottom: 2px !important;
   margin-top: 2px !important;
+  font-weight: 400;
+}
+
+.tabbrowser-tabs.large-tabs .tab-text {
   font-weight: 600;
 }
 
@@ -428,10 +433,9 @@
 
 .tabbrowser-tab[selected="true"],
 .tabbrowser-tab[multiselect="true"] {
-  /* margin: 0 !important; */
   border-left: 2px solid #ff9500 !important;
   border-radius: 0 !important;
-  background-color: #dadada60 !important;
+  background-color: #dadada !important;
   font-weight: normal;
   font-weight: 600 !important;
   text-shadow: none;
@@ -449,10 +453,9 @@
   border-left: 2px solid #0996f8 !important;
 }
 
-/* .tabbrowser-tab:not([selected="true"]):hover {
-  margin: 0 !important;
-  background-color: #ebebeb60 !important;
-} */
+.tabbrowser-tab:not([selected="true"]):hover {
+  background-color: #ebebeb !important;
+}
 
 .tabbrowser-tab[pinned] .tab-close-button,
 .tabbrowser-tab:not(:hover) .tab-close-button {
@@ -678,24 +681,6 @@
 }
 
 /* other customization */
-#main-window[sizemode="normal"] #verticaltabs-box{
-  margin-top:40px;
-}
-#appcontent {
-  margin-top:-2px;
-}
-#verticaltabs-box {
-  top:-1px;
-}
-#main-window[tabspinned="true"][sizemode="normal"] #nav-bar {
-   margin-left: calc( -3px - var(--pinned-width));
-}
-#main-window[sizemode="normal"] #urlbar-container {
-  margin-left:30px;
-}
-#main-window[tabspinned="true"][sizemode="normal"] #urlbar-container{
-  margin-left: 60px;
-}
 #alltabs-button, #new-tab-button .toolbarbutton-text{
   display: none!important;
 }
@@ -708,15 +693,6 @@
   background-size: 100% !important;
   border-left: 2px solid #0996f8 !important;
 }
-
-.tabbrowser-tab:after {
-    position: absolute !important;
-    right: -20px !important;
-    width: 100% !important;
-    border-bottom: 1px solid black !important;
-    content: ''!important;
-}
-
 
 .tabbrowser-tab > .tab-stack > .tab-content[attention] {
   background-image: none !important;

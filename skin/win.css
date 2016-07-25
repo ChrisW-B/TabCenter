@@ -59,3 +59,14 @@
     flex: 0 0 39px;
   }
 }
+
+
+/* making titlebar unnecessary */
+#nav-bar {
+  margin-top:6px;
+  padding-right:140px!important;
+}
+
+#TabsToolbar {
+  flex: 0 0 46px;
+}
