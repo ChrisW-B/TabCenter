@@ -681,14 +681,6 @@
 }
 
 /* other customization */
-
-#appcontent {
-  margin-top:-2px;
-}
-#verticaltabs-box {
-  top:-1px;
-}
-
 #alltabs-button, #new-tab-button .toolbarbutton-text{
   display: none!important;
 }

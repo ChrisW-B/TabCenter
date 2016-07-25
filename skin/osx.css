@@ -18,6 +18,13 @@
    margin-left: calc( -3px - var(--pinned-width));
 }
 
+#appcontent {
+  margin-top:-2px;
+}
+#verticaltabs-box {
+  top:-1px;
+}
+
 /* Make sidebar look more MacOS native */
 
 #verticaltabs-box {
