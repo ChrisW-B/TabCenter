@@ -59,3 +59,9 @@
     flex: 0 0 39px;
   }
 }
+
+
+/* making titlebar unnecessary */
+#nav-bar {
+  padding-right:140px!important;
+}
