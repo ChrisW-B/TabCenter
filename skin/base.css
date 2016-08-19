@@ -143,7 +143,7 @@
 #TabsToolbar[brighttext] > #new-tab-button,
 #TabsToolbar[brighttext] > toolbarpaletteitem > #new-tab-button {
   list-style-image: url("resource://tabcenter/skin/glyph-new-inverted-16.svg") !important;
-}
+} 
 
 #main-window[privatebrowsingmode="temporary"] #titlebar-buttonbox-container {
   margin-top: 4px;
@@ -377,8 +377,9 @@
   min-height: 36px;
   margin: 0 !important;
   margin-bottom: -1px !important;
+  margin-left:  -4px !important;
   border: 0 !important;
-  border-left: 2px solid transparent !important;
+  border-bottom: 1px solid hsla(0, 0%, 0%, 0.06) !important;
   border-radius: 0 !important;
   -moz-appearance: none !important;
   background: transparent !important;
@@ -386,7 +387,7 @@
   -moz-box-pack: start;
   color: #000 !important;
   transition: min-height 300ms, max-height 300ms !important;
-}
+  }
 
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-content,
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tabbrowser-tab {
@@ -472,10 +473,11 @@
   100% { max-height: 36px; min-height: 36px; opacity: 1; }
 }
 
-.tabbrowser-tab[selected="true"],
-.tabbrowser-tab[multiselect="true"] {
-  border-left: 2px solid #ff9500 !important;
+.tabbrowser-tab[pinned][selected="true"],
+.tabbrowser-tab[selected="true"] {
   border-radius: 0 !important;
+  background-color: hsla(0, 0%, 0%, 0.12) !important;
+  box-shadow: 1px 0 0 var(--color-blue-dark) inset, 2px 0 0 var(--color-blue) inset, 3px 0 0 var(--color-blue-light) inset;
   text-shadow: none;
 }
 
@@ -488,7 +490,7 @@
 }
 
 .tabbrowser-tab[pinned] {
-  border-left: 2px solid #0996f8 !important;
+  background-color: hsla(0, 0%, 0%, 0.05) !important;
 }
 
 #verticaltabs-box[expanded="false"] .tabbrowser-tab[pinned],
@@ -565,14 +567,8 @@
   box-shadow: 0 1px 0 hsla(0, 0%, 0%, 0.5) !important;
 }
 
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-close-button {
-  width: 24px !important;
-  height: 24px !important;
-  margin: 0 0 32px 3px !important;
-}
-
-.tabbrowser-tabs.large-tabs .tab-icon-overlay[muted],
-.tabbrowser-tabs.large-tabs .tab-icon-overlay[soundplaying] {
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-icon-overlay[muted],
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-icon-overlay[soundplaying] {
   margin-inline-start: -64px !important;
   margin-inline-end: 48px !important;
   margin-top: -32px !important;
@@ -622,6 +618,8 @@
 
 
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-meta-image {
+  max-width: 54px;
+  max-height: 40px;
   min-width: 54px;
   min-height: 40px;
   border: 2px solid white;
@@ -637,8 +635,8 @@
     0 0 0 1px hsla(0, 0%, 0%, 0.2);
 }
 
-.tabbrowser-tabs.large-tabs .tab-throbber,
-.tabbrowser-tabs.large-tabs .tab-icon-image {
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-throbber,
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-icon-image {
   margin-top: 18px !important;
   margin-left: -2px !important;
   border-radius: 2px;
@@ -648,7 +646,7 @@
     0 0 0 1px hsla(0, 0%, 0%, 0.08);
 }
 
-.tabbrowser-tabs.large-tabs html|canvas {
+#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs html|canvas {
   position: absolute;
   top: 7.5px;
   left: 12px;
@@ -657,7 +655,7 @@
   height: 40px;
 }
 
-.tabbrowser-tabs:not(.large-tabs) .tab-meta-image html|canvas {
+#main-window[tabspinned="true"] .tabbrowser-tabs:not(.large-tabs) .tab-meta-image html|canvas {
   display: none;
 }
 
@@ -834,17 +832,4 @@
 /* other customization */
 #alltabs-button, #new-tab-button .toolbarbutton-text{
   display: none!important;
-}
-
-/* Handle attention tabs */
-.tabbrowser-tab[attention] {
-  background-image: radial-gradient(22px at left center, #0996f8 19%, transparent 22%) !important;
-  background-position: -2px center !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% !important;
-  border-left: 2px solid #0996f8 !important;
-}
-
-.tabbrowser-tab > .tab-stack > .tab-content[attention] {
-  background-image: none !important;
 }

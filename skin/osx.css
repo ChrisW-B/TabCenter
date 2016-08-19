@@ -26,10 +26,10 @@
 
 /* Make sidebar look more MacOS native */
 
-#verticaltabs-box {
+/* #verticaltabs-box {
 	background-color:transparent;
 	-moz-appearance: -moz-mac-vibrancy-light !important;
-}
+} 
 
 .tabbrowser-tab[selected="true"],
 .tabbrowser-tab[multiselect="true"] {
@@ -84,7 +84,7 @@
 #verticaltabs-box #TabsToolbar {
   flex: 0 0 40px !important;
 }
-
+*/
 
 #TabsToolbar > toolbarbutton {
   padding: 0 5px !important;
