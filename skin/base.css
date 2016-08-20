@@ -379,7 +379,6 @@
   min-height: 36px;
   margin: 0 !important;
   margin-bottom: -1px !important;
-  margin-left:  -4px !important;
   border: 0 !important;
   border-bottom: 1px solid hsla(0, 0%, 0%, 0.06) !important;
   border-radius: 0 !important;
@@ -511,6 +510,7 @@
   background-position: calc(100% - 12px) center !important;
   background-repeat: no-repeat !important;
   background-size: 12px !important;
+  transition-delay: .75s !important;
 }
 
 #verticaltabs-box[brighttext][expanded="true"] .tabbrowser-tab[pinned],
@@ -621,7 +621,6 @@
   padding: 0 !important;
 }
 
-
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-meta-image {
   max-width: 54px;
   max-height: 40px;
@@ -660,13 +659,17 @@
   height: 40px;
 }
 
-#main-window[tabspinned="true"] .tabbrowser-tabs:not(.large-tabs) .tab-meta-image html|canvas {
+.tabbrowser-tabs:not(.large-tabs) .tab-meta-image html|canvas,
+#main-window[tabspinned="false"] .tabbrowser-tabs.large-tabs html|canvas {
   display: none;
 }
 
-#main-window[tabspinned="false"] .tab-meta-image {
-  background-image: none !important;
+.tabbrowser-tabs:not(.large-tabs) .tab-meta-image,
+#main-window[tabspinned="false"] .tabbrowser-tabs.large-tabs .tab-meta-image {
+  margin-left: -4px !important;
 }
+
+
 
 .tab-throbber,
 .tab-icon-image {
