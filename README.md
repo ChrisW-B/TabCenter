@@ -7,6 +7,9 @@
 - More native feel on MacOS, styled after iMessage
 - Fixes for "attention" tabs, such as those sent from another computer
 
+If this sounds good to you, you can download [here](https://github.com/ChrisW-B/VerticalTabs/raw/master/TabCenterTest.xpi)*
+
+###### *Please note that this addon will not automatically update, you'll have to keep coming back to update
 
 
 ##### Original README begins:
