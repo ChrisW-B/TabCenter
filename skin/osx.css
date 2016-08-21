@@ -1,90 +1,23 @@
 /*Only Mac Styles*/
 
 /* Shuffle things around so title bar isn't needed */
-#main-window[sizemode="normal"] #urlbar-container {
-  margin-left:30px;
+#main-window:not([inFullscreen]) #nav-bar {
+  margin-left: -30px;
 }
 
-#main-window[sizemode="normal"] #verticaltabs-box{
-  margin-top:40px;
-}
-
-#main-window[tabspinned="true"][sizemode="normal"] #urlbar-container{
+#main-window:not([inFullscreen]) #urlbar-container {
   margin-left: 60px;
 }
-
-#main-window[tabspinned="true"][sizemode="normal"] #nav-bar {
-   margin-left: calc( -3px - var(--pinned-width));
+#main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
+   margin-left: calc( 2px - var(--pinned-width));
 }
 
 #appcontent {
   margin-top:-2px;
 }
-#verticaltabs-box {
-  top:-1px;
+#main-window:not([inFullscreen]) #verticaltabs-box {
+  top:39px;
 }
-
-/* Make sidebar look more MacOS native */
-
-/* #verticaltabs-box {
-	background-color:transparent;
-	-moz-appearance: -moz-mac-vibrancy-light !important;
-} 
-
-.tabbrowser-tab[selected="true"],
-.tabbrowser-tab[multiselect="true"] {
-  border-left: 2px solid transparent !important;
-  border-radius: 0 !important;
-  background-color: rgb(62, 146, 249) !important;
-  color:white!important;
-}
-
-.tabbrowser-tab[selected="true"] .tab-text.address-label {
-  color:white!important;
-}
-
-.tabbrowser-tab:not([selected="true"]):hover {
-  background-color: transparent !important;
-}
-
-.tabbrowser-tabs{
-	border-top:none;
-}
-
-.tabbrowser-tab::after {
-  content: '\00a0' !important;
-  position: absolute !important;
-  left: 20px !important;
-  width: 100% !important;
-  line-height: 35px !important;
-  background:rgba(255,0,0,0.0)!important;
-  border-top: 1px solid black !important;
-  z-index:-999999999;
-}
-.tabbrowser-tab:first-child::after {
-  border-top:1px solid transparent!important;
-}
-.tabbrowser-tab:last-child::after {
-  border-bottom:1px solid black !important;
-}
-
-.tabbrowser-tab[selected="true"]::after{
-  border-top:1px solid transparent!important;
-  border-bottom:1px solid transparent!important;
-}
-
-.tabbrowser-tab[selected="true"] + .tabbrowser-tab::after {
-   border-top:1px solid transparent!important;
-}
-
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tabbrowser-tab::after {
-  line-height: 55px !important;
-}
-
-#verticaltabs-box #TabsToolbar {
-  flex: 0 0 40px !important;
-}
-*/
 
 #TabsToolbar > toolbarbutton {
   padding: 0 5px !important;

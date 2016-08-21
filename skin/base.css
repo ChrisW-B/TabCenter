@@ -510,7 +510,9 @@
   background-position: calc(100% - 12px) center !important;
   background-repeat: no-repeat !important;
   background-size: 12px !important;
-  transition-delay: .75s !important;
+  transition-duration: 350ms !important;
+  transition-property: background-position !important;
+  transition-delay: 1s !important;
 }
 
 #verticaltabs-box[brighttext][expanded="true"] .tabbrowser-tab[pinned],
@@ -740,9 +742,8 @@
 
 #TabsToolbar > #new-tab-button {
   display: -moz-box !important;
-  margin: 0 4px !important;
+  margin: 0 2px !important;
   padding: 0 6px !important;
-  min-width: 40px !important;
   -moz-box-align: center !important;
   -moz-box-orient: horizontal !important;
   -moz-box-pack: end !important;
@@ -751,13 +752,11 @@
 
 #TabsToolbar #new-tab-button .toolbarbutton-icon {
   margin: 0 !important;
-  margin-right: 6px !important;
   padding: 0 !important;
 }
 
 #TabsToolbar #new-tab-button .toolbarbutton-text {
-  display: inline !important;
-  padding: 0 !important;
+  display: none!important;
 }
 
 #TabsToolbar #new-tab-spacer {
@@ -838,6 +837,6 @@
 }
 
 /* other customization */
-#alltabs-button, #new-tab-button .toolbarbutton-text{
-  display: none!important;
+#new-tab-button > xul|label{
+  display: none !important;
 }
