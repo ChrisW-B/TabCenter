@@ -187,7 +187,7 @@
   box-sizing: border-box;
   background-color:#fbfbfb;
   flex-direction: column;
-  transition: box-shadow 150ms ease-out 300ms, width 150ms ease-out 300ms;
+  transition: box-shadow 150ms ease-out, width 150ms ease-out;
 }
 
 #verticaltabs-box[brighttext] {
@@ -229,7 +229,7 @@
 #main-window[tabspinned="true"] #verticaltabs-box {
   width: var(--pinned-width);
   box-shadow: none;
-  transition: box-shadow 0ms ease-in-out 0ms;
+  transition: box-shadow 0ms ease-in-out;
 }
 
 #alltabs-button {
@@ -274,6 +274,7 @@
   min-height: auto !important;
   border: 1px solid hsla(0, 0%, 0%, 0.16) !important;
   border-radius: 1px !important;
+  overflow: hidden;
   display: flex;
   align-items: center;
   flex: 20 0 auto;
@@ -503,11 +504,18 @@
   transition-property: background-position !important;
 }
 
-#verticaltabs-box[expanded="true"] .tabbrowser-tab[pinned],
-#verticaltabs-box[search_expanded="true"] .tabbrowser-tab[pinned],
-#main-window[tabspinned="true"] .tabbrowser-tab[pinned] {
+.tabbrowser-tab:not([selected="true"]):hover {
+  background-color: hsla(0, 0%, 0%, 0.08) !important;
+}
+
+.tabbrowser-tab[pinned] .tab-close-button,
+.tabbrowser-tab:not(:hover)[pinned] .tab-close-button {
+  visibility: hidden !important;
+}
+
+.tabbrowser-tab[pinned] .pinned-icon {
   background-image: url("resource://tabcenter/skin/glyph-pin-pinned-12.svg") !important;
-  background-position: calc(100% - 12px) center !important;
+  background-position: center center !important;
   background-repeat: no-repeat !important;
   background-size: 12px !important;
   transition-duration: 350ms !important;
@@ -515,18 +523,12 @@
   transition-delay: 1s !important;
 }
 
-#verticaltabs-box[brighttext][expanded="true"] .tabbrowser-tab[pinned],
-#verticaltabs-box[brighttext][search_expanded="true"] .tabbrowser-tab[pinned],
-#main-window[brighttext][tabspinned="true"] .tabbrowser-tab[pinned] {
+#verticaltabs-box[brighttext] .tabbrowser-tab[pinned] .pinned-icon,
+#main-window[brighttext] .tabbrowser-tab[pinned] .pinned-icon {
   background-image: url("resource://tabcenter/skin/glyph-pin-pinned-inverted-12.svg") !important;
 }
 
-.tabbrowser-tab:not([selected="true"]):hover {
-  background-color: hsla(0, 0%, 0%, 0.08) !important;
-}
-
-.tabbrowser-tab[pinned] .tab-close-button,
-.tabbrowser-tab:not(:hover)[pinned] .tab-close-button {
+.tabbrowser-tab:not([pinned]) .pinned-icon {
   visibility: hidden !important;
 }
 
