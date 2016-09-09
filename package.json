@@ -33,17 +33,25 @@
     "url": "git+https://github.com/bwinton/VerticalTabs.git"
   },
   "author": "Mozilla",
-  "contributors": [
-    {"name": "Blake Winton"},
-    {"name": "Vlad Vukicevic"},
-    {"name": "Darrin Henein"},
-    {"name": "Philipp von Weitershausen"},
-    {"name": "SHIMODA Hiroshi"},
-    {"name": "bb10"},
-    {"name": "Frank Yan"},
-    {"name": "Rob Campbel"},
-    {"name": "Erica Wright"}
-  ],
+  "contributors": [{
+    "name": "Blake Winton"
+  }, {
+    "name": "Vlad Vukicevic"
+  }, {
+    "name": "Darrin Henein"
+  }, {
+    "name": "Philipp von Weitershausen"
+  }, {
+    "name": "SHIMODA Hiroshi"
+  }, {
+    "name": "bb10"
+  }, {
+    "name": "Frank Yan"
+  }, {
+    "name": "Rob Campbel"
+  }, {
+    "name": "Erica Wright"
+  }],
   "license": "MPL-2.0",
   "bugs": {
     "url": "https://github.com/bwinton/VerticalTabs/issues"
@@ -51,35 +59,28 @@
   "homepage": "https://github.com/bwinton/VerticalTabs",
   "updateURL": "https://people.mozilla.com/~bwinton/TabCenter/tab-center.update.rdf",
   "preferences-branch": "verticaltabs",
-  "preferences": [
-    {
-      "name": "opentabstop",
-      "title": "Tabs on Top",
-      "description": "New tabs are opened at the top",
-      "type": "bool",
-      "value": false
-    },
-    {
-      "name": "largetabs",
-      "hidden": true,
-      "title": "Large Tabs",
-      "description": "Display thumbnails in tabs",
-      "type": "menulist",
-      "value": 1,
-      "options": [
-          {
-              "value": "0",
-              "label": "Never"
-          },
-          {
-              "value": "1",
-              "label": "When there is room"
-          },
-          {
-              "value": "2",
-              "label": "Always"
-          }
-      ]
-    }
-  ]
+  "preferences": [{
+    "name": "opentabstop",
+    "title": "Tabs on Top",
+    "description": "New tabs are opened at the top",
+    "type": "bool",
+    "value": false
+  }, {
+    "name": "largetabs",
+    "hidden": true,
+    "title": "Large Tabs",
+    "description": "Display thumbnails in tabs",
+    "type": "menulist",
+    "value": 1,
+    "options": [{
+      "value": "0",
+      "label": "Never"
+    }, {
+      "value": "1",
+      "label": "When there is room"
+    }, {
+      "value": "2",
+      "label": "Always"
+    }]
+  }]
 }

@@ -61,6 +61,7 @@ const {
 createInstance(Ci.nsIURIFixup);
 Cu.import('resource://gre/modules/PageThumbs.jsm');
 Cu.import('resource:///modules/CustomizableUI.jsm');
+Cu.import('resource://gre/modules/Services.jsm');
 //use to set preview image as metadata image 1/4
 // Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 const NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
@@ -93,12 +94,31 @@ VerticalTabs.prototype = {
 		this.inferFromText = this.window.ToolbarIconColor.inferFromText;
 		let window = this.window;
 		let document = this.document;
-		this.BrowserOpenTab = this.window.BrowserOpenTab;
-		this.window.BrowserOpenTab = function() {
-			this.pushToTop = prefs.opentabstop;
-			this.window.openUILinkIn(this.window.BROWSER_NEW_TAB_URL, 'tab');
-			this.pushToTop = false;
-		}.bind(this);
+		let oldAddTab = window.gBrowser.addTab;
+		window.gBrowser.addTab = function(...args) {
+			let t = oldAddTab.bind(window.gBrowser)(...args);
+			if (prefs.opentabstop) {
+				let aRelatedToCurrent;
+				let aReferrerURI;
+				if (arguments.length === 2 && typeof arguments[1] === 'object' && !(arguments[1] instanceof Ci.nsIURI)) {
+					let params = arguments[1];
+					aReferrerURI = params.referrerURI;
+					aRelatedToCurrent = params.relatedToCurrent;
+				}
+				if ((aRelatedToCurrent == null ? aReferrerURI : aRelatedToCurrent) && Services.prefs.getBoolPref('browser.tabs.insertRelatedAfterCurrent')) {
+					let newTabPos = (this._lastRelatedTab || this.selectedTab)._tPos - 1;
+					this.moveTabTo(t, newTabPos);
+					this._lastRelatedTab = t;
+				} else {
+					this.moveTabTo(t, 0);
+				}
+			}
+			return t;
+		};
+		//reset _lastRelatedTab on changing preferences
+		require('sdk/simple-prefs').on('opentabstop', function() {
+			window.gBrowser._lastRelatedTab = null;
+		});
 		let tabs = document.getElementById('tabbrowser-tabs');
 		let tabsProgressListener = {
 			onLocationChange: (aBrowser, aWebProgress, aRequest, aLocation, aFlags) => {
@@ -132,6 +152,7 @@ VerticalTabs.prototype = {
 			}
 		});
 		window.gBrowser._endRemoveTab = (aTab) => {
+			window.gBrowser._blurTab(aTab);
 			aTab.classList.add('tab-hidden');
 		};
 		window.ToolbarIconColor.inferFromText = function() {
@@ -181,7 +202,7 @@ VerticalTabs.prototype = {
 			this.window.gBrowser.removeTabsProgressListener(tabsProgressListener);
 			this.window.ToolbarIconColor.inferFromText = this.inferFromText;
 			this.window.gBrowser._endRemoveTab = this._endRemoveTab;
-			this.window.BrowserOpenTab = this.BrowserOpenTab;
+			this.window.gBrowser.addTab = oldAddTab;
 		});
 		this.window.onunload = () => {
 			addPingStats(this.stats);
@@ -203,7 +224,7 @@ VerticalTabs.prototype = {
 				} else if (mutation.type === 'attributes' && mutation.target.id === 'PopupAutoCompleteRichResult' && mutation.attributeName === 'width') {
 					results.removeAttribute('width');
 				} else if (mutation.type === 'attributes' && mutation.attributeName === 'overflow' && mutation.target.id === 'tabbrowser-tabs') {
-					if (mutation.newValue === '') {
+					if (mutation.target.getAttribute('overflow') !== 'true') {
 						tabs.setAttribute('overflow', 'true'); //always set overflow back to true
 					}
 				} else if (mutation.type === 'childList' && leftbox.getAttribute('expanded') !== 'true') {
@@ -411,14 +432,15 @@ VerticalTabs.prototype = {
 		});
 		leftbox.contextMenuOpen = false;
 		let contextMenuHidden = (event) => {
-			leftbox.contextMenuOpen = false;
-			// give user time to move mouse back in after closing context menu,
-			// also allow for event to finish before checking for this.mouseInside
-			window.setTimeout(() => {
-				if (!this.mouseInside) {
+			//don't catch close events from tooltips
+			if (event.originalTarget.tagName === 'xul:menupopup' || event.originalTarget.tagName === 'menupopup') {
+				leftbox.contextMenuOpen = false;
+				// give user time to move mouse back in after closing context menu,
+				// also allow for event to finish before checking for this.mouseInside
+				window.setTimeout(() => {
 					exit();
-				}
-			}, 200);
+				}, 200);
+			}
 		};
 		document.addEventListener('popuphidden', contextMenuHidden);
 		leftbox.addEventListener('contextmenu', function(event) {
@@ -448,19 +470,20 @@ VerticalTabs.prototype = {
 		};
 		let enterTimeout = -1;
 		let exit = (event) => {
-			this.mouseExited();
-			if (enterTimeout > 0) {
-				window.clearTimeout(enterTimeout);
-				enterTimeout = -1;
-			}
-			if (mainWindow.getAttribute('tabspinned') !== 'true') {
-				if (!leftbox.contextMenuOpen) {
-					leftbox.removeAttribute('expanded');
-					this.clearFind();
+			if (!this.mouseInside) {
+				if (enterTimeout > 0) {
+					window.clearTimeout(enterTimeout);
+					enterTimeout = -1;
 				}
-				let tabsPopup = document.getElementById('alltabs-popup');
-				if (tabsPopup.state === 'open') {
-					tabsPopup.hidePopup();
+				if (mainWindow.getAttribute('tabspinned') !== 'true') {
+					if (!leftbox.contextMenuOpen) {
+						leftbox.removeAttribute('expanded');
+						this.clearFind();
+					}
+					let tabsPopup = document.getElementById('alltabs-popup');
+					if (tabsPopup.state === 'open') {
+						tabsPopup.hidePopup();
+					}
 				}
 			}
 		};
@@ -485,9 +508,15 @@ VerticalTabs.prototype = {
 				}
 			}, 300);
 		};
+		let pauseBeforeExit = () => {
+			this.mouseExited();
+			window.setTimeout(() => {
+				exit();
+			}, 200);
+		};
 		leftbox.addEventListener('mouseenter', enter);
 		leftbox.addEventListener('mousemove', enter);
-		leftbox.addEventListener('mouseleave', exit);
+		leftbox.addEventListener('mouseleave', pauseBeforeExit);
 		let oldUpdateToolbars = window.FullScreen._updateToolbars;
 		window.FullScreen._updateToolbars = (aEnterFS) => {
 			oldUpdateToolbars.bind(window.FullScreen)(aEnterFS);
@@ -501,14 +530,6 @@ VerticalTabs.prototype = {
 				window.gNavToolbox.style.marginTop = (-window.gNavToolbox.getBoundingClientRect().height - 1) + 'px';
 				document.getElementById('appcontent').insertBefore(toggler, sibling);
 			}
-		};
-		//hidden nav toolbox needs to be moved 1 pix higher to account for the toggler every time it hides
-		let oldHideNavToolbox = window.FullScreen.hideNavToolbox;
-		window.FullScreen.hideNavToolbox = (aAnimate = false) => {
-			oldHideNavToolbox.bind(window.FullScreen)(aAnimate);
-			let toggler = document.getElementById('fullscr-toggler');
-			toggler.removeAttribute('hidden');
-			window.gNavToolbox.style.marginTop = (-window.gNavToolbox.getBoundingClientRect().height - 1) + 'px';
 		};
 		tabs.addEventListener('TabOpen', this, false);
 		tabs.addEventListener('TabClose', this, false);
@@ -540,7 +561,7 @@ VerticalTabs.prototype = {
 		this.unloaders.push(function() {
 			autocomplete._openAutocompletePopup = autocompleteOpen;
 			window.FullScreen._updateToolbars = oldUpdateToolbars;
-			window.FullScreen.hideNavToolbox = oldHideNavToolbox;
+			// window.FullScreen.hideNavToolbox = oldHideNavToolbox;
 			// Move the tabs toolbar back to where it was
 			toolbar._toolbox = null; // reset value set by constructor
 			toolbar.removeAttribute('toolboxid');
@@ -636,9 +657,6 @@ VerticalTabs.prototype = {
 	},
 	initTab: function(aTab) {
 		let document = this.document;
-		if (this.pushToTop) {
-			this.window.gBrowser.moveTabTo(aTab, 0);
-		}
 		let find_input = this.document.getElementById('find-input');
 		find_input.value = '';
 		emit(find_input, 'input', {
@@ -677,6 +695,7 @@ VerticalTabs.prototype = {
 					let number_of_tabs = this.document.querySelectorAll('.tabbrowser-tab:not([hidden=true])').length;
 					if (tabbrowser_height / number_of_tabs >= 58 && this.pinnedWidth > 60) {
 						tabs.classList.add('large-tabs');
+						this.refreshAllTabs();
 					} else {
 						tabs.classList.remove('large-tabs');
 					}
@@ -685,6 +704,12 @@ VerticalTabs.prototype = {
 			case 2:
 				tabs.classList.add('large-tabs');
 				return;
+		}
+	},
+	refreshAllTabs: function() {
+		let tabs = this.document.getElementById('tabbrowser-tabs');
+		for (let tab of tabs.childNodes) {
+			tab.refreshThumbAndLabel();
 		}
 	},
 	resizeTabs: function() {
