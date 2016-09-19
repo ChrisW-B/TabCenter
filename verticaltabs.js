@@ -42,9 +42,6 @@ const {
 	Cu
 } = require('chrome');
 const {
-	emit
-} = require('sdk/dom/events');
-const {
 	platform
 } = require('sdk/system');
 const {
@@ -405,7 +402,6 @@ VerticalTabs.prototype = {
           window.VerticalTabs.stats.tab_center_unpinned++;
           button.setAttribute('tooltiptext', 'Keep sidebar open');
           document.getElementById('verticaltabs-box').removeAttribute('search_expanded');
-          document.getElementById('find-input').blur();
         }
         window.VerticalTabs.resizeFindInput();
         window.VerticalTabs.resizeTabs();
@@ -657,12 +653,7 @@ VerticalTabs.prototype = {
 	},
 	initTab: function(aTab) {
 		let document = this.document;
-		let find_input = this.document.getElementById('find-input');
-		find_input.value = '';
-		emit(find_input, 'input', {
-			category: 'Event',
-			settings: ['input', false, false]
-		});
+		this.clearFind();
 		this.resizeTabs();
 		aTab.classList.add('tab-visible');
 		aTab.classList.remove('tab-hidden');
