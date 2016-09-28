@@ -13,41 +13,19 @@
   --color-teal: #01bdad;
 }
 
-.arrowscrollbox-overflow-start-indicator,
-.arrowscrollbox-overflow-end-indicator {
-  display: none;
-  margin: 0 !important;
+.tabbrowser-arrowscrollbox > scrollbox {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+#main-window[tabspinned="true"] #tabbrowser-tabs[mouseInside] .tabbrowser-arrowscrollbox > scrollbox,
+#main-window:not([tabspinned="true"]) #verticaltabs-box[expanded="true"] .tabbrowser-arrowscrollbox > scrollbox {
+  overflow-y: auto !important;
 }
 
 .tabbrowser-arrowscrollbox  .scrollbutton-up,
 .tabbrowser-arrowscrollbox  .scrollbutton-down {
-  min-height: 25px !important;
-  max-height: 25px !important;
-  margin: 0 !important;
-  -moz-image-region: rect(0, 0, 0, 0) !important;
-}
-
-.tabbrowser-arrowscrollbox > .scrollbutton-down[disabled] > .toolbarbutton-icon,
-.tabbrowser-arrowscrollbox > .scrollbutton-up[disabled] > .toolbarbutton-icon {
-  -moz-image-region: rect(0, 0, 0, 0) !important;
-}
-
-.tabbrowser-arrowscrollbox .scrollbutton-down {
-  border-top: 1px solid hsla(0, 0%, 0%, 0.06) !important;
-  list-style-image: url("resource://tabcenter/skin/glyph-arrow-page-down-16.svg") !important;
-}
-
-.tabbrowser-arrowscrollbox .scrollbutton-up {
-  border-bottom: 1px solid hsla(0, 0%, 0%, 0.06) !important;
-  list-style-image: url("resource://tabcenter/skin/glyph-arrow-page-up-16.svg") !important;
-}
-
-#verticaltabs-box[brighttext] .tabbrowser-arrowscrollbox .scrollbutton-down {
-  list-style-image: url("resource://tabcenter/skin/glyph-arrow-page-down-inverted-16.svg") !important;
-}
-
-#verticaltabs-box[brighttext] .tabbrowser-arrowscrollbox .scrollbutton-up {
-  list-style-image: url("resource://tabcenter/skin/glyph-arrow-page-up-inverted-16.svg") !important;
+  visibility: collapse !important;
 }
 
 /* Ensure the tab favicon doesn't stretch. */
@@ -274,10 +252,10 @@
   min-height: auto !important;
   border: 1px solid hsla(0, 0%, 0%, 0.16) !important;
   border-radius: 1px !important;
-  overflow: hidden;
-  display: flex;
+  overflow: -moz-hidden-unscrollable;
   align-items: center;
   flex: 20 0 auto;
+  line-height: 26px;
   transition-duration: 0.1s;
   transition-property: border-color, box-shadow;
 }
@@ -289,6 +267,8 @@
 }
 
 #tabs-search {
+  display: block;
+  margin: 2px 0;
   min-width: 20px;
   max-width: 20px;
   -moz-image-region: rect(0, 20px, 20px, 0);
@@ -296,6 +276,12 @@
 }
 
 #find-input html|*.textbox-input {
+  max-width: 100% !important;
+}
+
+#find-input .textbox-input-box {
+  display: block;
+  margin-left: 20px;
   max-width: calc(100% - 20px) !important;
 }
 
@@ -834,6 +820,11 @@
   background-position: -8px center !important;
   background-repeat: no-repeat !important;
   background-size: 16px !important;
+}
+
+/*stop the gradient from dev edition theme*/
+#navigator-toolbox > toolbar:not(#TabsToolbar):not(#toolbar-menubar) {
+  background: transparent none repeat scroll 0% 0% !important;
 }
 
 /* other customization */
