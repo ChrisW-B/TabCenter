@@ -346,8 +346,8 @@ VerticalTabs.prototype = {
 				let offset = rect.left - elementRect.left;
 				let width = rect.width;
 				if (mainWindow.getAttribute('tabspinned') !== 'true') {
-					offset += 45;
-					width -= 45;
+					offset += 30;
+					width -= 30;
 				} else {
 					offset += this.pinnedWidth;
 					width -= this.pinnedWidth;
@@ -360,7 +360,6 @@ VerticalTabs.prototype = {
 				autocomplete.style.width = width + 'px';
 			}
 		};
-
 
 		// save the label of the first tab, and the toolbox palette for later…
 		let tabs = document.getElementById('tabbrowser-tabs');
@@ -402,6 +401,12 @@ VerticalTabs.prototype = {
 		let splitter = this.createElement('vbox', {
 			'id': 'verticaltabs-splitter'
 		});
+
+		if (mainWindow.getAttribute('tabspinned') !== 'true' && mainWindow.getAttribute('tabspinned') !== 'false') {
+			mainWindow.setAttribute('tabspinned', 'true');
+			leftbox.setAttribute('expanded', 'true');
+		}
+
 		browserbox.insertBefore(leftbox, contentbox);
 		browserbox.insertBefore(splitter, browserbox.firstChild);
 		mainWindow.setAttribute('persist',
@@ -418,8 +423,8 @@ VerticalTabs.prototype = {
 				// event.preventDefault();
 				let xDelta = event.screenX - initialX;
 				this.pinnedWidth = xDelta;
-				if (this.pinnedWidth < 45) {
-					this.pinnedWidth = 45;
+				if (this.pinnedWidth < 30) {
+					this.pinnedWidth = 30;
 				}
 				if (this.pinnedWidth > document.width / 2) {
 					this.pinnedWidth = document.width / 2;
@@ -549,11 +554,9 @@ VerticalTabs.prototype = {
 					window.clearTimeout(enterTimeout);
 					enterTimeout = -1;
 				}
-				if (mainWindow.getAttribute('tabspinned') !== 'true') {
-					if (!leftbox.contextMenuOpen) {
-						leftbox.removeAttribute('expanded');
-						this.clearFind();
-					}
+				if (mainWindow.getAttribute('tabspinned') !== 'true' && leftbox.getAttribute('search_expanded') !== 'true' && !leftbox.contextMenuOpen) {
+					leftbox.removeAttribute('expanded');
+					this.clearFind();
 					let tabsPopup = document.getElementById('alltabs-popup');
 					if (tabsPopup.state === 'open') {
 						tabsPopup.hidePopup();
@@ -571,7 +574,7 @@ VerticalTabs.prototype = {
 						leftbox.setAttribute('expanded', 'true');
 						this.adjustCrop();
 					}, 300);
-				} else if (event.pageX <= 4) {
+} else if (event.pageX <= 4) {
 					if (enterTimeout > 0) {
 						window.clearTimeout(enterTimeout);
 						enterTimeout = -1;
@@ -624,18 +627,13 @@ VerticalTabs.prototype = {
 			if (aEnterFS && fullscreenctls.parentNode.id === 'TabsToolbar') {
 				navbar.appendChild(fullscreenctls);
 				toggler.removeAttribute('hidden');
+				//hidden nav toolbox needs to be moved 1 pix higher to account for the toggler every time it hides
 				window.gNavToolbox.style.marginTop = (-window.gNavToolbox.getBoundingClientRect().height - 1) + 'px';
 				document.getElementById('appcontent').insertBefore(toggler, sibling);
+				mainWindow.setAttribute('F11-fullscreen', 'true');
+			} else {
+				mainWindow.removeAttribute('F11-fullscreen');
 			}
-		};
-
-		//hidden nav toolbox needs to be moved 1 pix higher to account for the toggler every time it hides
-		let oldHideNavToolbox = window.FullScreen.hideNavToolbox;
-		window.FullScreen.hideNavToolbox = (aAnimate = false) => {
-			oldHideNavToolbox.bind(window.FullScreen)(aAnimate);
-			let toggler = document.getElementById('fullscr-toggler');
-			toggler.removeAttribute('hidden');
-			window.gNavToolbox.style.marginTop = (-window.gNavToolbox.getBoundingClientRect().height - 1) + 'px';
 		};
 
 		tabs.addEventListener('TabOpen', this, false);
@@ -673,7 +671,6 @@ VerticalTabs.prototype = {
 		this.unloaders.push(function() {
 			autocomplete._openAutocompletePopup = autocompleteOpen;
 			window.FullScreen._updateToolbars = oldUpdateToolbars;
-			window.FullScreen.hideNavToolbox = oldHideNavToolbox;
 
 			// Move the tabs toolbar back to where it was
 			toolbar._toolbox = null; // reset value set by constructor
