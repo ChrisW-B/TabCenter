@@ -11,6 +11,10 @@
 #main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
    margin-left: calc( 2px - var(--pinned-width));
 }
+#verticaltabs-box #TabsToolbar {
+  margin-bottom: 0 !important;
+  flex: 0 0 40px !important;
+}
 
 #appcontent {
   margin-top:-2px;
