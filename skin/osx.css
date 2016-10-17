@@ -23,17 +23,17 @@
   top:39px;
 }
 
-#TabsToolbar > toolbarbutton {
+#verticaltabs-box #TabsToolbar > toolbarbutton {
   padding: 0 5px !important;
   border-radius: 2.5px !important;
 }
 
-#TabsToolbar > toolbarbutton:hover {
+#verticaltabs-box #TabsToolbar > toolbarbutton:hover {
   border: 1px solid hsla(0, 0%, 0%, 0.16) !important;
   background-color: hsla(0, 0%, 0%, 0.1) !important;
 }
 
-#TabsToolbar > toolbarbutton:hover:active {
+#verticaltabs-box #TabsToolbar > toolbarbutton:hover:active {
   border: 1px solid hsla(0, 0%, 0%, 0.16) !important;
   background-color: hsla(0, 0%, 0%, 0.16) !important;
   box-shadow: none !important;
@@ -87,13 +87,12 @@
   transition-duration: 150ms !important;
 }
 
-#find-input .textbox-input-box {
-  margin-top: -19px;
+#main-window:not([devedition-theme]) #navigator-toolbox > toolbar:not(#TabsToolbar):-moz-lwtheme {
+  background-color: transparent !important;
+  background-image: linear-gradient(hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.65)) !important;
 }
 
 #navigator-toolbox > toolbar:not(#TabsToolbar):-moz-lwtheme {
-  background-color: transparent !important;
-  background-image: linear-gradient(hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.65)) !important;
   box-shadow: none !important;
 }
 

@@ -39,7 +39,8 @@
 'use strict';
 
 const {
-  Cc, Ci
+  Cc,
+  Ci
 } = require('chrome');
 
 
@@ -106,13 +107,13 @@ exports.sendPing = sendPing;
 
 /* Preferences */
 
-const {
-  set, reset
+const {set,
+  reset
 } = require('sdk/preferences/service');
 
 const DEFAULT_PREFS = new Map([
   ['browser.tabs.animate', false],
-  ['browser.tabs.drawInTitlebar', true]
+  ['browser.tabs.drawInTitlebar', false]
 ]);
 
 function setDefaultPrefs() {
@@ -136,9 +137,9 @@ const {
   newURI
 } = require('sdk/url/utils');
 const {
-  loadAndRegisterSheet, unregisterSheet, USER_SHEET
-} = Cc['@mozilla.org/content/style-sheet-service;1'].
-getService(Ci.nsIStyleSheetService);
+  loadSheet,
+  removeSheet
+} = require('sdk/stylesheet/utils');
 
 const STYLESHEETS = [
   'resource://tabcenter/override-bindings.css',
@@ -146,16 +147,16 @@ const STYLESHEETS = [
   'chrome://tabcenter/skin/platform.css'
 ];
 
-function installStylesheets() {
+function installStylesheets(win) {
   for (let uri of STYLESHEETS) {
-    loadAndRegisterSheet(newURI(uri), USER_SHEET);
+    loadSheet(win, uri, 'author');
   }
 }
 exports.installStylesheets = installStylesheets;
 
-function removeStylesheets() {
+function removeStylesheets(win) {
   for (let uri of STYLESHEETS) {
-    unregisterSheet(newURI(uri), USER_SHEET);
+    removeSheet(win, uri, 'author');
   }
 }
 exports.removeStylesheets = removeStylesheets;

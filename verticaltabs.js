@@ -63,9 +63,6 @@ Cu.import('resource://gre/modules/PageThumbs.jsm');
 Cu.import('resource:///modules/CustomizableUI.jsm');
 Cu.import('resource://gre/modules/Services.jsm');
 
-//use to set preview image as metadata image 1/4
-// Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-
 const NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
 const TAB_DROP_TYPE = 'application/x-moz-tabbrowser-tab';
 
@@ -864,13 +861,23 @@ VerticalTabs.prototype = {
 			this.resizeTimeout = -1;
 		}
 		this.mouseInside = true;
+		let arrowscrollbox = this.document.getAnonymousElementByAttribute(tabs, 'anonid', 'arrowscrollbox');
+		let scrollbox = this.document.getAnonymousElementByAttribute(arrowscrollbox, 'anonid', 'scrollbox');
+		let scrolltop = scrollbox.scrollTop;
+
 		tabs.setAttribute('mouseInside', 'true');
+		scrollbox.scrollTop = scrolltop;
 	},
 
 	mouseExited: function() {
 		let tabs = this.document.getElementById('tabbrowser-tabs');
+		let arrowscrollbox = this.document.getAnonymousElementByAttribute(tabs, 'anonid', 'arrowscrollbox');
+		let scrollbox = this.document.getAnonymousElementByAttribute(arrowscrollbox, 'anonid', 'scrollbox');
+		let scrolltop = scrollbox.scrollTop;
 		this.mouseInside = false;
 		tabs.removeAttribute('mouseInside');
+		scrollbox.scrollTop = scrolltop;
+
 		if (this.resizeTimeout < 0) {
 			// Once the mouse exits the tab area, wait
 			// a bit before resizing
@@ -882,12 +889,6 @@ VerticalTabs.prototype = {
 			}, WAIT_BEFORE_RESIZE);
 		}
 	},
-
-	//use to set preview image as metadata image 3/4
-	// getPageMetaDataImage: function (aTab) {
-	//   var tabMeta = this.PageMetadata.getData(aTab.linkedBrowser.contentDocument);
-	//   return tabMeta['og:image'];
-	// },
 
 	/*** Event handlers ***/
 
@@ -938,6 +939,3 @@ exports.addVerticalTabs = (win, data) => {
 		new VerticalTabs(win, data);
 	}
 };
-
-//use to set preview image as metadata image 4/4
-// XPCOMUtils.defineLazyModuleGetter(VerticalTabs.prototype, "PageMetadata", "resource://gre/modules/PageMetadata.jsm");
