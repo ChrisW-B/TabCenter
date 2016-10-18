@@ -1,5 +1,6 @@
-@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
-@namespace html url("http://www.w3.org/1999/xhtml");
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul") ;
+
+@namespace html url("http://www.w3.org/1999/xhtml") ;
 
 :root {
   --tab-animation-time: 150ms;
@@ -120,7 +121,7 @@
 #TabsToolbar[brighttext] > #new-tab-button,
 #TabsToolbar[brighttext] > toolbarpaletteitem > #new-tab-button {
   list-style-image: url("resource://tabcenter/skin/glyph-new-inverted-16.svg") !important;
-} 
+}
 
 #main-window[privatebrowsingmode="temporary"] #titlebar-buttonbox-container {
   margin-top: 4px;
@@ -162,7 +163,7 @@
   display: flex;
   overflow-x: hidden;
   box-sizing: border-box;
-  background-color:#fbfbfb;
+  background-color: #fbfbfb;
   flex-direction: column;
   transition: box-shadow 150ms ease-out, width 150ms ease-out;
 }
@@ -390,7 +391,7 @@
   -moz-box-pack: start;
   color: #000 !important;
   transition: min-height 300ms, max-height 300ms !important;
-  }
+}
 
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-content,
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tabbrowser-tab {
@@ -461,19 +462,47 @@
 }
 
 @keyframes fade-out {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes slide-out {
-  0% { max-height: 36px; min-height: 36px; opacity: 0; }
-  100% { max-height: 0; min-height: 0; opacity: 0; }
+  0% {
+    max-height: 36px;
+    min-height: 36px;
+    opacity: 0;
+  }
+
+  100% {
+    max-height: 0;
+    min-height: 0;
+    opacity: 0;
+  }
 }
 
 @keyframes slide-fade-in {
-  0% { max-height: 0; min-height: 0; opacity: 0; }
-  50% { max-height: 36px; min-height: 36px; opacity: 0; }
-  100% { max-height: 36px; min-height: 36px; opacity: 1; }
+  0% {
+    max-height: 0;
+    min-height: 0;
+    opacity: 0;
+  }
+
+  50% {
+    max-height: 36px;
+    min-height: 36px;
+    opacity: 0;
+  }
+
+  100% {
+    max-height: 36px;
+    min-height: 36px;
+    opacity: 1;
+  }
 }
 
 .tabbrowser-tab[pinned][selected="true"],
@@ -490,10 +519,6 @@
 
 #verticaltabs-box[brighttext] .tabbrowser-tab[pinned] {
   background-color: hsla(0, 0%, 0%, 0.2) !important;
-}
-
-.tabbrowser-tab[pinned] {
-  background-color: hsla(0, 0%, 0%, 0.05) !important;
 }
 
 #verticaltabs-box[expanded="false"] .tabbrowser-tab[pinned],
@@ -638,10 +663,7 @@
   background-position: top center !important;
   background-repeat: no-repeat !important;
   background-size: cover !important;
-  box-shadow:
-    0 0 2px 2px hsla(0, 0%, 0%, 0.02),
-    0 2px 0 hsla(0, 0%, 0%, 0.05),
-    0 0 0 1px hsla(0, 0%, 0%, 0.2);
+  box-shadow: 0 0 2px 2px hsla(0, 0%, 0%, 0.02), 0 2px 0 hsla(0, 0%, 0%, 0.05), 0 0 0 1px hsla(0, 0%, 0%, 0.2);
 }
 
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-throbber,
@@ -650,9 +672,7 @@
   margin-left: -2px !important;
   border-radius: 2px;
   background-color: #fff !important;
-  box-shadow:
-    0 0 2px hsla(0, 0%, 0%, 0.08),
-    0 0 0 1px hsla(0, 0%, 0%, 0.08);
+  box-shadow: 0 0 2px hsla(0, 0%, 0%, 0.08), 0 0 0 1px hsla(0, 0%, 0%, 0.08);
 }
 
 #main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs html|canvas {
@@ -673,8 +693,6 @@
 #main-window[tabspinned="false"] .tabbrowser-tabs.large-tabs .tab-meta-image {
   margin-left: -4px !important;
 }
-
-
 
 .tab-throbber,
 .tab-icon-image {
@@ -745,12 +763,8 @@
 }
 
 #TabsToolbar > #new-tab-button {
-<<<<<<< HEAD
   display: -moz-box !important;
   margin: 0 2px !important;
-=======
-  margin: 0 4px !important;
->>>>>>> 25340db2cda0af7374925d9b937cf8382eebbc59
   padding: 0 6px !important;
   -moz-box-align: center !important;
   -moz-box-orient: horizontal !important;
@@ -764,7 +778,7 @@
 }
 
 #TabsToolbar #new-tab-button .toolbarbutton-text {
-  display: none!important;
+  display: none !important;
 }
 
 #TabsToolbar #new-tab-spacer {
@@ -844,12 +858,7 @@
   background-size: 16px !important;
 }
 
-/*stop the gradient from dev edition theme*/
-#navigator-toolbox > toolbar:not(#TabsToolbar):not(#toolbar-menubar) {
-  background: transparent none repeat scroll 0% 0% !important;
-}
-
 /* other customization */
-#new-tab-button > xul|label{
-  display: none !important;
+#new-tab-button > xul|label {
+  display: none !important
 }

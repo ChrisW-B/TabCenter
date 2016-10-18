@@ -113,7 +113,7 @@ const {set,
 
 const DEFAULT_PREFS = new Map([
   ['browser.tabs.animate', false],
-  ['browser.tabs.drawInTitlebar', false]
+  ['browser.tabs.drawInTitlebar', true]
 ]);
 
 function setDefaultPrefs() {
