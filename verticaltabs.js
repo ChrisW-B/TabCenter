@@ -331,12 +331,14 @@ VerticalTabs.prototype = {
 			} else {
 				let offset = rect.left - elementRect.left;
 				let width = rect.width;
-				if (mainWindow.getAttribute('tabspinned') !== 'true') {
-					offset += 30;
-					width -= 30;
-				} else {
-					offset += this.pinnedWidth;
-					width -= this.pinnedWidth;
+				if (mainWindow.getAttribute('F11-fullscreen') !== 'true') {
+					if (mainWindow.getAttribute('tabspinned') !== 'true') {
+						offset += 30;
+						width -= 30;
+					} else {
+						offset += this.pinnedWidth;
+						width -= this.pinnedWidth;
+					}
 				}
 				if (sidebar.getAttribute('hidden') !== 'true') {
 					offset += sidebar.getBoundingClientRect().width;
@@ -433,6 +435,7 @@ VerticalTabs.prototype = {
 		// Move the tabs next to the app content, make them vertical,
 		// and restore their width from previous session
 		tabs.setAttribute('vertical', true);
+		tabs.setAttribute('overflow', 'true');
 		leftbox.insertBefore(tabs, leftbox.firstChild);
 		tabs.orient = 'vertical';
 		tabs.mTabstrip.orient = 'vertical';
@@ -689,6 +692,9 @@ VerticalTabs.prototype = {
 			tabs.removeEventListener('TabClose', this, false);
 			tabs.removeEventListener('TabPinned', this, false);
 			tabs.removeEventListener('TabUnpinned', this, false);
+
+			//save the first tab's label to restore after unbinding/binding
+			label = tabs.firstChild.label;
 			tabs.removeAttribute('vertical');
 
 			// Restore all individual tabs.
@@ -713,6 +719,7 @@ VerticalTabs.prototype = {
 			browserPanel.insertBefore(toolbox, browserPanel.firstChild);
 			browserPanel.insertBefore(bottom, document.getElementById('fullscreen-warning').nextSibling);
 			top.palette = palette;
+			tabs.firstChild.label = label;
 			this.window.TabsInTitlebar.updateAppearance(true);
 		});
 	},
