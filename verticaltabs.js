@@ -533,8 +533,6 @@ VerticalTabs.prototype = {
       this.tabObserver.observe(results, {attributes: true});
     }
 
-    window.TabsInTitlebar.allowedBy('tabcenter', false);
-
     this.unloaders.push(function () {
       this.tabObserver.disconnect();
     });
@@ -575,8 +573,8 @@ VerticalTabs.prototype = {
         let width = rect.width;
         if (mainWindow.getAttribute('F11-fullscreen') !== 'true') {
           if (mainWindow.getAttribute('tabspinned') !== 'true') {
-            offset += 45;
-            width -= 45;
+            offset += this.collapsedWidth;
+            width -= this.collapsedWidth;
           } else {
             offset += this.pinnedWidth;
             width -= this.pinnedWidth;
@@ -661,6 +659,11 @@ VerticalTabs.prototype = {
                        +window.getComputedStyle(document.documentElement)
                               .getPropertyValue('--pinned-width').replace('px', '');
     document.documentElement.style.setProperty('--pinned-width', `${this.pinnedWidth}px`);
+
+    this.collapsedWidth = +mainWindow.getAttribute('tabscollapsedWidth').replace('px', '') ||
+                       +window.getComputedStyle(document.documentElement)
+                              .getPropertyValue('--pinned-width').replace('px', '');
+    document.documentElement.style.setProperty('--pinned-width', `${this.collapsedWidth}px`);
 
     splitter.addEventListener('mousedown', (event) => {
       if (event.which !== 1) {
@@ -1037,7 +1040,6 @@ VerticalTabs.prototype = {
       browserPanel.insertBefore(bottom, document.getElementById('fullscreen-warning').nextSibling);
       top.palette = palette;
       tabs.firstChild.label = label;
-      this.window.TabsInTitlebar.updateAppearance(true);
     });
   },
 
@@ -1225,7 +1227,6 @@ VerticalTabs.prototype = {
       tabs._positionPinnedTabs(); //Does not do anything?
     }
     removeStylesheets(window);
-    window.TabsInTitlebar.allowedBy('tabcenter', true);
   },
 
   actuallyResizeTabs: function () {

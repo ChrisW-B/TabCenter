@@ -13,7 +13,7 @@
         "Cc": false,
         "Ci": false,
         "TAB_DROP_TYPE": false,
-        "TabsInTitlebar": false,
+        "TabsInTitlebar": true,
         "_startScroll": false,
         "_distanceScroll": false,
         "_stopScroll": false
