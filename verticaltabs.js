@@ -662,8 +662,8 @@ VerticalTabs.prototype = {
 
     this.collapsedWidth = +mainWindow.getAttribute('tabscollapsedWidth').replace('px', '') ||
                        +window.getComputedStyle(document.documentElement)
-                              .getPropertyValue('--pinned-width').replace('px', '');
-    document.documentElement.style.setProperty('--pinned-width', `${this.collapsedWidth}px`);
+                              .getPropertyValue('--collapsed-width').replace('px', '');
+    document.documentElement.style.setProperty('--collapsed-width', `${this.collapsedWidth}px`);
 
     splitter.addEventListener('mousedown', (event) => {
       if (event.which !== 1) {
