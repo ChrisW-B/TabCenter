@@ -4,4 +4,9 @@ build
 TabCenterTest.zip
 /node_modules/
 npm-debug.log
+<<<<<<< HEAD
 .jshintrc
+=======
+/locale/**
+!/locale/README.md
+>>>>>>> master

@@ -38,11 +38,18 @@
 /* global require, exports:false */
 'use strict';
 
+<<<<<<< HEAD
 const {
   Cc,
   Ci
 } = require('chrome');
 
+=======
+const {Cc, Ci} = require('chrome');
+const prefs = require('sdk/simple-prefs');
+const {get, set, reset} = require('sdk/preferences/service');
+const NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
+>>>>>>> master
 
 /* Payload */
 
@@ -58,32 +65,25 @@ const PAYLOAD_KEYS = [
   'tabs_unpinned',
   'tab_center_pinned',
   'tab_center_unpinned',
-  'tab_center_expanded'
+  'tab_center_expanded',
+  'tab_center_toggled_off',
+  'tab_center_toggled_on',
+  'tab_center_search_focus',
+  'tab_center_search_blur',
+  'tour_began',
+  'tour_accepted',
+  'tour_continue',
+  'tour_complete',
+  'tour_dismissed',
+  'hotkey_on',
+  'hotkey_off'
 ];
 
-function Stats() {
-  for (let key of PAYLOAD_KEYS) {
-    this[key] = 0;
+function sendPing(key, window, details) {
+  if (!PAYLOAD_KEYS.includes(key)) {
+    // console.log(`Could not find ${key} in payload keys.`);
+    return false;
   }
-}
-exports.Stats = Stats;
-
-let payload = new Stats;
-payload.version = 1;
-
-function addPingStats(stats) {
-  for (let key of PAYLOAD_KEYS) {
-    payload[key] += stats[key] || 0;
-  }
-}
-exports.addPingStats = addPingStats;
-
-function setPayload(key, value) {
-  payload[key] = value;
-}
-exports.setPayload = setPayload;
-
-function sendPing() {
   // This looks strange, but it's required to send over the test ID.
   const subject = {
     wrappedJSObject: {
@@ -92,21 +92,30 @@ function sendPing() {
     }
   };
 
+  let payload = {
+    version: 2,
+    tab_center_tabs_on_top: prefs.prefs.opentabstop,
+    tab_center_show_thumbnails: prefs.prefs.largetabs,
+    tab_center_window_id: window.VerticalTabsWindowId,
+    tab_center_currently_toggled_on: window.document.getElementById('main-window').getAttribute('toggledon') === 'true',
+    tour_completed: !!get('extensions.tabcentertest1@mozilla.com.tourComplete'),
+    event_type: key
+  };
+  Object.assign(payload, details);
+
   let ping = JSON.stringify(payload);
+  // console.log('send ping: ' + ping); //debug: to check the ping details
 
   // Send metrics to the main Test Pilot add-on.
   notifyObservers(subject, 'testpilot::send-metric', ping);
-
-  // Clear out the metrics for next time…
-  for (let key of PAYLOAD_KEYS) {
-    payload[key] = 0;
-  }
+  return true;
 }
 exports.sendPing = sendPing;
 
 
 /* Preferences */
 
+<<<<<<< HEAD
 const {set,
   reset
 } = require('sdk/preferences/service');
@@ -114,6 +123,10 @@ const {set,
 const DEFAULT_PREFS = new Map([
   ['browser.tabs.animate', false],
   ['browser.tabs.drawInTitlebar', true]
+=======
+const DEFAULT_PREFS = new Map([
+  ['browser.tabs.animate', false]
+>>>>>>> master
 ]);
 
 function setDefaultPrefs() {
@@ -129,7 +142,6 @@ function removeDefaultPrefs() {
   }
 }
 exports.removeDefaultPrefs = removeDefaultPrefs;
-
 
 /* Stylesheets */
 
@@ -149,14 +161,40 @@ const STYLESHEETS = [
 
 function installStylesheets(win) {
   for (let uri of STYLESHEETS) {
-    loadSheet(win, uri, 'author');
+    installStylesheet(win, uri);
   }
 }
 exports.installStylesheets = installStylesheets;
 
 function removeStylesheets(win) {
   for (let uri of STYLESHEETS) {
-    removeSheet(win, uri, 'author');
+    removeStylesheet(win, uri);
   }
 }
+<<<<<<< HEAD
 exports.removeStylesheets = removeStylesheets;
+=======
+exports.removeStylesheets = removeStylesheets;
+
+function installStylesheet(win, uri) {
+  loadSheet(win, uri, 'author');
+}
+exports.installStylesheet = installStylesheet;
+
+function removeStylesheet(win, uri) {
+  removeSheet(win, uri, 'author');
+}
+exports.removeStylesheet = removeStylesheet;
+
+function createElement(doc, label, attrs) {
+  let rv = doc.createElementNS(NS_XUL, label);
+  if (attrs) {
+    for (let attr in attrs) {
+      rv.setAttribute(attr, attrs[attr]);
+    }
+  }
+  return rv;
+}
+
+exports.createElement = createElement;
+>>>>>>> master

@@ -1,6 +1,7 @@
 /*Only Mac Styles*/
 
 /* Shuffle things around so title bar isn't needed */
+<<<<<<< HEAD
 #main-window:not([inFullscreen]) #nav-bar {
   margin-left: -30px;
 }
@@ -11,6 +12,30 @@
 #main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
    margin-left: calc( 2px - var(--pinned-width));
 }
+=======
+#main-window {
+  --collapsed-width: 70px;
+}
+
+#main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
+  margin-left: calc(2px - var(--pinned-width));
+}
+#verticaltabs-box #TabsToolbar {
+  margin-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  flex: 0 0 40px !important;
+  flex: 0 0 40px !important;
+}
+#appcontent {
+  margin-top: -2px;
+}
+#main-window:not([inFullscreen]) #verticaltabs-box {
+  top: 39px;
+}
+#appcontent {
+  border-top: 0 !important;
+}
+>>>>>>> master
 #verticaltabs-box #TabsToolbar {
   margin-bottom: 0 !important;
   flex: 0 0 40px !important;
@@ -24,7 +49,7 @@
 }
 
 #verticaltabs-box #TabsToolbar > toolbarbutton {
-  padding: 0 5px !important;
+  padding: 0 4px !important;
   border-radius: 2.5px !important;
 }
 
@@ -56,9 +81,9 @@
     list-style-image: url("resource://tabcenter/skin/glyph-new-16.svg") !important;
   }
 
-  #TabsToolbar[brighttext] .tabs-newtab-button,
-  #TabsToolbar[brighttext] > #new-tab-button,
-  #TabsToolbar[brighttext] > toolbarpaletteitem > #new-tab-button {
+  #main-window[brighttext] #TabsToolbar .tabs-newtab-button,
+  #main-window[brighttext] #TabsToolbar > #new-tab-button,
+  #main-window[brighttext] #TabsToolbar > toolbarpaletteitem > #new-tab-button {
     list-style-image: url("resource://tabcenter/skin/glyph-new-inverted-16.svg") !important;
   }
 }
@@ -85,11 +110,6 @@
   border: 1px solid hsla(210, 100%, 60%, 0.6) !important;
   box-shadow: 0 0 0 3px hsla(210, 100%, 60%, 0.45) !important;
   transition-duration: 150ms !important;
-}
-
-#main-window:not([devedition-theme]) #navigator-toolbox > toolbar:not(#TabsToolbar):-moz-lwtheme {
-  background-color: transparent !important;
-  background-image: linear-gradient(hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, 0.65)) !important;
 }
 
 #navigator-toolbox > toolbar:not(#TabsToolbar):-moz-lwtheme {

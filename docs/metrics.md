@@ -95,11 +95,17 @@ Tab Center will record and report each of the following metrics:
   - Tab pins
   - Tab unpins
 - Tab Center actions, specifically:
+  - Tab Center on-boarding tour:
+    - complete or incomplete
+    - button clicks within the tour
   - Tab Center pins
   - Tab Center unpins
   - Tab Center contraction events
   - Tab Center expansion events
-  - Tab Center inaction contraction (Version 2)
+  - Tab Center activated
+  - Tab Center inactivated
+  - Tab Center tabs in reverse order
+  - Tab Center show large thumbnails
 
 This data will be used in three ways:
 
@@ -111,40 +117,70 @@ This data will be used in three ways:
 
 Tab Center is a purely client-side experiment so we will only be collecting metrics from the client leveraging Test Pilot’s reporting functionality with the `testpilottest` type identifier.
 
-Tab Center will record data and submit it periodically (vs sending data continuously).  At launch, we will record and send data every 24 hours or on shutdown of the browser, whichever is first.
+Tab Center will record data and submit it on each event trigger.
 
 An example payload (within the full Telemetry ping):
 
 ```js
 {
-  "version": 1,  // Just in case we need to drastically change the format later
-  "tabs_created": 1000,
-  "tabs_destroyed": 1000,
-  "tabs_pinned": 5,
-  "tabs_unpinned": 4,
-  "tab_center_pinned": 1,
-  "tab_center_unpinned": 0,
-  "tab_center_expanded": 9999
-  /* "tab_center_teased": 1234  (Version 2) */
+  "version": 2,
+  "tab_center_tabs_on_top": false,
+  "tab_center_show_thumbnails": true,
+  "tab_center_window_id": 1,
+  "tab_center_currently_toggled_on": true,
+  "tour_completed": false,
+  "event_type": "tour_began",
+  "details": "reminder"
 }
 ```
 
 And the schema we will use for Redshift:
 ```sql
 local schema = {
---   column name              field type    length  attributes   field name
-    {"timestamp",             "TIMESTAMP",  nil,    "SORTKEY",  "Timestamp"},
-    {"uuid",                  "VARCHAR",    36,     nil,        get_uuid},
-    {"service",               "VARCHAR",    255,    nil,        "test"},
-
-    {"tabs_created",          "INTEGER",    nil,    nil,        "tabs_created"},
-    {"tabs_destroyed",        "INTEGER",    nil,    nil,        "tabs_destroyed"},
-    {"tabs_pinned",           "INTEGER",    nil,    nil,        "tabs_pinned"},
-    {"tabs_unpinned",         "INTEGER",    nil,    nil,        "tabs_unpinned"},
-    {"tab_center_pinned",     "INTEGER",    nil,    nil,        "tab_center_pinned"},
-    {"tab_center_unpinned",   "INTEGER",    nil,    nil,        "tab_center_unpinned"},
-    {"tab_center_expanded",   "INTEGER",    nil,    nil,        "tab_center_expanded"}
---  {"tab_center_teased",     "INTEGER",    nil,    nil,        "payload[tab_center_teased]"}  (Version 2)
+--   column name                        field type    length  attributes   field name
+    {"version",                         "INTEGER",    nil,    nil,        "version"},
+    {"timestamp",                       "TIMESTAMP",  nil,    "SORTKEY",  "Timestamp"},
+    {"uuid",                            "VARCHAR",    36,     nil,        get_uuid},
+    {"service",                         "VARCHAR",    255,    nil,        "test"},
+    {"tour_completed",                  "BOOLEAN",    nil,    nil,        "tour_completed"},
+    {"tab_center_tabs_on_top",          "BOOLEAN",    nil,    nil,        "tab_center_tabs_on_top"},
+    {"tab_center_show_thumbnails",      "BOOLEAN",    nil,    nil,        "tab_center_show_thumbnails"},
+    {"tab_center_window_id",            "INTEGER",    nil,    nil,        "tab_center_window_id"},
+    {"tab_center_currently_toggled_on", "BOOLEAN",    nil,    nil,        "tab_center_currently_toggled_on"},
+    {"event_type",                      "VARCHAR",    255,    nil,        "event_type"},
+    {"details",                         "VARCHAR",    255,    nil,        "details"}
 }
 
+```
+
+Possible values for `event_type`:
+
+```js
+"tabs_created",
+"tabs_destroyed",
+"tabs_pinned",
+"tabs_unpinned",
+"tab_center_pinned",
+"tab_center_unpinned",
+"tab_center_expanded",
+"tab_center_toggled_off",
+"tab_center_toggled_on",
+"tab_center_search_focus",
+"tab_center_search_blur",
+"tour_began",
+"tour_accepted",
+"tour_continue",
+"tour_complete",
+"tour_dismissed",
+"hotkey_on",
+"hotkey_off"
+```
+
+Possible values for `details`:
+
+```js
+"install",
+"reminder",
+"completed_reminder",
+"search_engaged"
 ```

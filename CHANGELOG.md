@@ -1,3 +1,93 @@
+# v1.30 - Welcome on board! 🛳
+
+### New Features:
+
+* Simplified large look for new tabs.
+* Onboarding tour.
+
+### Fixes:
+
+* Add event_type field.  (Fixes #939.)
+* Tab animation fixes.  (Fixes #918, #897.)
+* Restore Places controllers after rearranging navigator-toolbox. . 🎉  (Fixes #583.)
+* Always check toggledon attribute against 'true'.
+* Tour videos had a black border.
+* Toolbar customization.
+* "Close Other Tabs" confirmation dialog.  (Fixes #937.)
+* Toggle top/side tabs focuses wrong tab.  (Fixes #849.)
+* Don't allow tabs opened from pinned tabs to open above them.  (Fixes #932.)
+* Pinned tabs get closed from 'Close Tabs Above' context option.  (Fixes #928.)
+* pinned tabs stay to the left when on top.  (Fixes #927.)
+* compatibility with Toolbar Position Changer add-on
+* Rework pinned tabs.  (Fixes #880, #888, #879, #817, #881.)
+* Merge all tab resize requests in an event loop turn.
+* updateWindowResizers doesn't exist sometimes.
+* Splitter only accepts left clicks.  (Fixes #900.)
+* Scroll to open tab correctly after exiting the tab column
+* Drag & scroll on reversed tabs.
+
+
+# v1.29 - Windows and Linux.
+
+### Fixes:
+
+* Restore each window session on windows and linux.
+* Restore persistant attributes for win and linux (not per window yet).  (Fixes #818.)
+
+
+# v1.28 - Go somewhere else…
+
+### Fixes:
+
+* Fix update links.  (Fixes #727.)
+
+
+# v1.27 - Waffling…
+
+### New Features:
+
+* Add a toggle to switch between side tabs and top tabs.  (Fixes #691.)
+* Add twenty [new locales](https://pontoon.mozilla.org/projects/test-pilot-tab-center/)!
+* Save TabCenter state per-window.  (Fixes #391, #431, #528.)
+* Reverse display order for "Open Tabs Above" option
+
+### Fixes:
+
+* Reversed scroll.
+* Print preview.  (Fixes #791, #792.)
+* Resize tabs on initing a tab.
+* Upgrade will not reverse tabs.  (Fixes #780.)
+* Scroll jump to top of tab list.  (Fixes #738, #693.)
+* reversed mouse-wheel scrolling.  (Fixes #776.)
+* Errors.
+* Remove popuphidden event listener on unload.
+* Cleaner Animations.  (Fixes #758.)
+* Theme Changes in Win and Linux.  (Fixes #476.)
+* Mouse enter after toggle.  (Fixes #759.)
+* pin-button dynamic tooltiptext.  (Fixes #751.)
+* Typo, and change to array for filter.
+* Visible tabs null on changing groups.  (Fixes #754.)
+* Restore urlbar value.  (Fixes #739.)
+* Don't allow tab to be hidden if there is no label.  (Fixes #750, #752.)
+* Check for tab.label before trying to match.
+* Init pin-button with "shrink" tooltip.  (Fixes #742.)
+* Search input overflow.  (Fixes #743.)
+* Separate tabactions and tabgroupchange in clearfind.  (Fixes #733.)
+* Force pinned width to be half of window size, or less, when resizing the window.  (Fixes #604.)
+* Do not scroll selected tab into view on mouse out/in.  (Fixes #730.)
+* Right click on various buttons shouldn't activate them.  (Fixes #472.)
+* Only clear visible tabs when using tabgroups to switch.
+* Re-work the Telemetry ping.  🎧
+* Hide tab center in print preview mode.  (Fixes #721.)
+* refreshThumbAndLabel is now a function.  (Fixes #718.)
+* Filter only through visible tabs.  (Fixes #692.)
+* First tab title should not become "new tab".  (Fixes #564.)
+* Fix initial tab scrolling.  (Fixes #698.)
+* Allow autocomplete to expand to full width in windows fullscreen.  (Fixes #705.)
+* On change of overflow, keep scroll position the same.  (Fixes #669.)
+* Hide TC in windows fullscreen with sidebar open.
+
+
 # v1.26 - Tweaks and other crop.
 
 ### Fixes:

@@ -17,12 +17,75 @@
 
   <binding id="tabbrowser-arrowscrollbox" extends="chrome://browser/content/tabbrowser.xml#tabbrowser-arrowscrollbox">
     <implementation>
+      <field name="_isRTLScrollbox"><![CDATA[
+        document.getElementById('tabbrowser-tabs').getAttribute('opentabstop') === 'true';
+      ]]></field>
+
       <property name="_verticalTabs" onget="return this.orient == 'vertical';"/>
 
       <method name="_canScrollToElement">
         <parameter name="tab"/>
         <body><![CDATA[
-          return !tab.hidden;
+          let canScroll = !tab.hidden && !this.skipNextScroll;
+          this.skipNextScroll = false;
+          return canScroll;
+        ]]></body>
+      </method>
+
+      <method name="_elementFromPoint">
+        <parameter name="aX"/>
+        <parameter name="aPhysicalScrollDir"/>
+        <body><![CDATA[
+
+          let elements = this._getScrollableElements();
+          if (!elements.length){
+            return null;
+          }
+
+          let [start, end] = this._startEndProps;
+          let low, high;
+          let reverse = this.parentNode.getAttribute('opentabstop') === 'true';
+          if (reverse) {
+            high = 0;
+            low = elements.length - 1;
+          } else {
+            low = 0;
+            high = elements.length - 1;
+          }
+
+          if (aX < elements[low].getBoundingClientRect()[start] ||
+          aX > elements[high].getBoundingClientRect()[end]) {
+            return null;
+          }
+
+          let mid, rect;
+          while (low <= high) {
+            mid = Math.floor((low + high) / 2);
+            rect = elements[mid].getBoundingClientRect();
+            if (rect[start] > aX) {
+              high = mid - 1;
+            } else if (rect[end] < aX) {
+              low = mid + 1;
+            } else {
+              return elements[mid];
+            }
+          }
+
+          // There's no element at the requested coordinate, but the algorithm
+          // from above yields an element next to it, in a random direction.
+          // The desired scrolling direction leads to the correct element.
+
+          if (!aPhysicalScrollDir){
+            return null;
+          }
+
+          if (aPhysicalScrollDir < 0 && rect[start] > aX){
+            mid = Math.max(mid - 1, 0);
+          } else if (aPhysicalScrollDir > 0 && rect[end] < aX){
+            mid = Math.min(mid + 1, elements.length - 1);
+          }
+
+          return elements[mid];
         ]]></body>
       </method>
     </implementation>
@@ -64,7 +127,6 @@
         if (numberOfTabs === 1) {
           return;
         }
-        tabs._handleTabSelect(false);
       ]]></handler>
     </handlers>
   </binding>
@@ -161,20 +223,36 @@
 
           draggedTab._dragData.animLastScreenPos = screenPos;
 
-          let rtl = false; //(window.getComputedStyle(this).direction === 'rtl');
+          let reverse = this.getAttribute('opentabstop') === 'true';
+
           let pinned = draggedTab.pinned;
-          let numPinned = this.tabbrowser._numPinnedTabs;
-          let tabs = this.tabbrowser.visibleTabs
-                                    .slice(pinned ? 0 : numPinned,
-                                           pinned ? numPinned : undefined);
-          if (rtl) {
+
+          let tabs = this.tabbrowser.visibleTabs;
+          let numPinned = 0 ;
+          for (let i = 0; i < tabs.length; i++) {
+            if (!tabs[i].pinned){
+              continue;
+            }
+            numPinned += 1;
+          }
+
+          if (reverse){
+            tabs = tabs.slice(pinned ? (tabs.length - numPinned) : 0, pinned ? undefined : (tabs.length - numPinned));
+          } else {
+            tabs = tabs.slice(pinned ? 0 : numPinned, pinned ? numPinned : undefined);
+          }
+
+          // only reverse tabs once, otherwise it will flicker
+          if (reverse && !tabs.reversed) {
+            tabs.reversed = true;
             tabs.reverse();
+          } if (!reverse) {
+            tabs.reversed = false;
           }
 
           let tabSize = draggedTab.getBoundingClientRect().height;
 
           // Move the dragged tab based on the mouse position.
-
           let leftTab = tabs[0];
           let rightTab = tabs[tabs.length - 1];
           let tabScreenPos = draggedTab.boxObject.screenY;
@@ -212,9 +290,18 @@
           }
 
           if (tabbrowser.getAttribute('mouseInside') === 'true' && mouseY > bottomMin && mouseY < bottomMin + 30){
-            scrollbuttonDown.onmousedown(event);
+            //if tabs are reversed trigger the opposite button's scroll event instead
+            if (tabbrowser.getAttribute('opentabstop') === 'true') {
+              scrollbuttonUp.onmousedown(event);
+            } else {
+              scrollbuttonDown.onmousedown(event);
+            }
           } else if (tabbrowser.getAttribute('mouseInside') === 'true' && mouseY < topMax && mouseY > (topMax - 40)) {
-            scrollbuttonUp.onmousedown(event);
+            if (tabbrowser.getAttribute('opentabstop') === 'true') {
+              scrollbuttonDown.onmousedown(event);
+            } else {
+              scrollbuttonUp.onmousedown(event);
+            }
           } else {
             scrollbuttonUp.onmouseout();
             scrollbuttonDown.onmouseout();
@@ -270,10 +357,10 @@
 
           function getTabShift(tab, dropIndex) {
             if (tab._tPos < draggedTab._tPos && tab._tPos >= dropIndex) {
-              return rtl ? -tabSize : tabSize;
+              return reverse ? -tabSize : tabSize;
             }
             if (tab._tPos > draggedTab._tPos && tab._tPos < dropIndex) {
-              return rtl ? tabSize : -tabSize;
+              return reverse ? tabSize : -tabSize;
             }
             return 0;
           }
@@ -310,7 +397,9 @@
               this.mTabstripHeight = height;
             }
 
-            this.tabbrowser.updateWindowResizers();
+            if (this.tabbrowser.updateWindowResizers) {
+              this.tabbrowser.updateWindowResizers(); //method only exists in older than v53
+            }
             break;
           case 'mouseout':
             // If the 'related target' (the node to which the pointer went) is not
@@ -360,6 +449,54 @@
             }
           }
           return tabs.length;
+        ]]></body>
+      </method>
+
+      <method name="_notifyBackgroundTab">
+        <parameter name="aTab"/>
+        <body><![CDATA[
+          if (aTab.pinned || aTab.hidden) {
+            return;
+          }
+
+          let scrollRect = this.mTabstrip.scrollClientRect;
+          let tab = aTab.getBoundingClientRect();
+          this.mTabstrip._calcTabMargins(aTab);
+
+          // DOMRect top/bottom properties are immutable.
+          tab = {top: tab.top, bottom: tab.bottom};
+
+          // Is the new tab already completely visible?
+          if (scrollRect.top <= tab.top && tab.bottom <= scrollRect.bottom){
+            return;
+          }
+
+          if (this.mTabstrip.smoothScroll) {
+            let selected = !this.selectedItem.pinned &&
+                           this.selectedItem.getBoundingClientRect();
+            if (selected) {
+              selected = {top: selected.top, bottom: selected.bottom};
+            }
+
+            // Can we make both the new tab and the selected tab completely visible?
+            if (!selected ||
+                Math.max(tab.bottom - selected.top, selected.bottom - tab.top) <=
+                  scrollRect.height) {
+              this.mTabstrip.ensureElementIsVisible(aTab);
+              return;
+            }
+
+            this.mTabstrip._smoothScrollByPixels(this.mTabstrip._isRTLScrollbox ?
+                                                 selected.bottom - scrollRect.bottom :
+                                                 selected.top - scrollRect.top);
+          }
+
+          if (!this._animateElement.hasAttribute('notifybgtab')) {
+            this._animateElement.setAttribute('notifybgtab', 'true');
+            setTimeout(function (ele) {
+              ele.removeAttribute('notifybgtab');
+            }, 150, this._animateElement);
+          }
         ]]></body>
       </method>
     </implementation>
@@ -595,8 +732,10 @@
         </xul:hbox>
         <xul:hbox xbl:inherits="pinned,selected,visuallyselected,titlechanged,attention"
                   class="tab-content" align="center">
+          <xul:hbox xbl:inherits="selected,visuallyselected"
+                    class="tab-selected-indicator" role="presentation"/>
           <xul:vbox xbl:inherits="fadein,pinned,selected,visuallyselected,busy,crashed,sharing"
-                     class="tab-meta-image">
+                    class="tab-meta-image">
             <html:canvas anonid="tab-meta-image"
                          width="54" height="40"/>
             <xul:image xbl:inherits="fadein,pinned,busy,progress,selected,visuallyselected"
@@ -618,15 +757,13 @@
                      class="tab-icon-overlay"
                      role="presentation"/>
           <xul:vbox class="title-wrapper" flex="1">
-            <xul:label
-                       xbl:inherits="value=label,crop,accesskey,fadein,pinned,selected,visuallyselected,attention"
+            <xul:label xbl:inherits="value=label,crop,accesskey,fadein,pinned,selected,visuallyselected,attention"
                        class="tab-text"
                        role="presentation"/>
-            <xul:label
-                      xbl:inherits="value=address,crop,accesskey,fadein,pinned,selected,visuallyselected,attention"
-                      class="tab-text address-label"
-                      anonid="address-label"
-                      role="presentation"/>
+            <xul:label xbl:inherits="value=address,crop,accesskey,fadein,pinned,selected,visuallyselected,attention"
+                       class="tab-text address-label"
+                       anonid="address-label"
+                       role="presentation"/>
           </xul:vbox>
           <xul:image xbl:inherits="soundplaying,pinned,muted,visuallyselected"
                      anonid="soundplaying-icon"
@@ -649,7 +786,6 @@
         const canvas = document.getAnonymousElementByAttribute(this, 'anonid', 'tab-meta-image');
         canvas.width *= window.devicePixelRatio;
         canvas.height *= window.devicePixelRatio;
-        this.refreshThumbAndLabel();
        ]]></constructor>
 
       <method name="refreshThumbAndLabel">
@@ -668,7 +804,8 @@
             return;
           }
           const canvas = document.getAnonymousElementByAttribute(this, 'anonid', 'tab-meta-image');
-          if (VerticalTabs.newTabImage && (url === 'about:newtab' || url === 'about:blank')) {
+          const NEWTAB_URLS = ['about:newtab', 'about:blank', 'about:privatebrowsing'];
+          if (VerticalTabs.newTabImage && NEWTAB_URLS.includes(url)) {
             const ctx = canvas.getContext('2d');
             ctx.save();
             ctx.scale(
@@ -678,7 +815,18 @@
             ctx.drawImage(VerticalTabs.newTabImage, 0, 0);
             ctx.restore();
           } else {
-            PageThumbs.captureToCanvas(this.linkedBrowser, canvas);
+            if (this.linkedBrowser.contentWindow) {
+              let x = {};
+              try {
+                //sometimes captureToCanvas throws errors, stop them here instead
+                this.linkedBrowser.contentWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils).getPresShellId(x);
+                PageThumbs.captureToCanvas(this.linkedBrowser, canvas);
+              } catch (e) {
+                //sometimes we can't get the background thumb yet, ignore it.
+              }
+            } else {
+              PageThumbs.captureToCanvas(this.linkedBrowser, canvas);
+            }
           }
         ]]></body>
       </method>
@@ -691,8 +839,14 @@
             label = uri.host;
           }
           // URI can be shown immediately
+          const HIDE_URL_FOR = ['about:blank', 'about:home', 'about:newtab',
+            'about:privatebrowsing', 'about:sessionrestore', 'about:welcomeback'];
           if (label) {
-            this.setAttribute('address', label);
+            if (HIDE_URL_FOR.includes(label)) {
+              this.removeAttribute('address');
+            } else {
+              this.setAttribute('address', label);
+            }
           }
         ]]></body>
       </method>
