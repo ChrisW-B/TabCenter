@@ -38,18 +38,16 @@
 /* global require, exports:false */
 'use strict';
 
-<<<<<<< HEAD
 const {
   Cc,
   Ci
 } = require('chrome');
-
-=======
-const {Cc, Ci} = require('chrome');
 const prefs = require('sdk/simple-prefs');
-const {get, set, reset} = require('sdk/preferences/service');
+const {get,
+  set,
+  reset
+} = require('sdk/preferences/service');
 const NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
->>>>>>> master
 
 /* Payload */
 
@@ -115,18 +113,8 @@ exports.sendPing = sendPing;
 
 /* Preferences */
 
-<<<<<<< HEAD
-const {set,
-  reset
-} = require('sdk/preferences/service');
-
-const DEFAULT_PREFS = new Map([
-  ['browser.tabs.animate', false],
-  ['browser.tabs.drawInTitlebar', true]
-=======
 const DEFAULT_PREFS = new Map([
   ['browser.tabs.animate', false]
->>>>>>> master
 ]);
 
 function setDefaultPrefs() {
@@ -171,9 +159,6 @@ function removeStylesheets(win) {
     removeStylesheet(win, uri);
   }
 }
-<<<<<<< HEAD
-exports.removeStylesheets = removeStylesheets;
-=======
 exports.removeStylesheets = removeStylesheets;
 
 function installStylesheet(win, uri) {
@@ -197,4 +182,3 @@ function createElement(doc, label, attrs) {
 }
 
 exports.createElement = createElement;
->>>>>>> master

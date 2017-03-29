@@ -134,27 +134,6 @@
     "url": "git+https://github.com/bwinton/VerticalTabs.git"
   },
   "author": "Mozilla",
-<<<<<<< HEAD
-  "contributors": [{
-    "name": "Blake Winton"
-  }, {
-    "name": "Vlad Vukicevic"
-  }, {
-    "name": "Darrin Henein"
-  }, {
-    "name": "Philipp von Weitershausen"
-  }, {
-    "name": "SHIMODA Hiroshi"
-  }, {
-    "name": "bb10"
-  }, {
-    "name": "Frank Yan"
-  }, {
-    "name": "Rob Campbel"
-  }, {
-    "name": "Erica Wright"
-  }],
-=======
   "contributors": [
     {
       "name": "Blake Winton"
@@ -184,7 +163,6 @@
       "name": "Erica Wright"
     }
   ],
->>>>>>> master
   "license": "MPL-2.0",
   "bugs": {
     "url": "https://github.com/bwinton/VerticalTabs/issues"
@@ -192,32 +170,6 @@
   "homepage": "https://github.com/bwinton/VerticalTabs",
   "updateURL": "https://testpilot.firefox.com/files/tabcentertest1@mozilla.com/updates.json",
   "preferences-branch": "verticaltabs",
-<<<<<<< HEAD
-  "preferences": [{
-    "name": "opentabstop",
-    "title": "Open Tabs Above",
-    "description": "Newer tabs are opened above older tabs",
-    "type": "bool",
-    "value": false
-  }, {
-    "name": "largetabs",
-    "hidden": true,
-    "title": "Large Tabs",
-    "description": "Display thumbnails in tabs",
-    "type": "menulist",
-    "value": 1,
-    "options": [{
-      "value": "0",
-      "label": "Never"
-    }, {
-      "value": "1",
-      "label": "When there is room"
-    }, {
-      "value": "2",
-      "label": "Always"
-    }]
-  }]
-=======
   "preferences": [
     {
       "name": "opentabstop",
@@ -249,5 +201,4 @@
       ]
     }
   ]
->>>>>>> master
 }

@@ -1,7 +1,5 @@
 /*Only Mac Styles*/
-
 /* Shuffle things around so title bar isn't needed */
-<<<<<<< HEAD
 #main-window:not([inFullscreen]) #nav-bar {
   margin-left: -30px;
 }
@@ -9,10 +7,11 @@
 #main-window:not([inFullscreen]) #urlbar-container {
   margin-left: 60px;
 }
+
 #main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
-   margin-left: calc( 2px - var(--pinned-width));
+  margin-left: calc(2px - var(--pinned-width));
 }
-=======
+
 #main-window {
   --collapsed-width: 70px;
 }
@@ -20,32 +19,33 @@
 #main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
   margin-left: calc(2px - var(--pinned-width));
 }
+
 #verticaltabs-box #TabsToolbar {
   margin-bottom: 0 !important;
   margin-bottom: 0 !important;
   flex: 0 0 40px !important;
   flex: 0 0 40px !important;
 }
+
 #appcontent {
   margin-top: -2px;
 }
+
 #main-window:not([inFullscreen]) #verticaltabs-box {
   top: 39px;
 }
+
 #appcontent {
   border-top: 0 !important;
 }
->>>>>>> master
+
 #verticaltabs-box #TabsToolbar {
   margin-bottom: 0 !important;
   flex: 0 0 40px !important;
 }
 
-#appcontent {
-  margin-top:-2px;
-}
-#main-window:not([inFullscreen]) #verticaltabs-box {
-  top:39px;
+#verticaltabs-box {
+  border-top: 0 !important;
 }
 
 #verticaltabs-box #TabsToolbar > toolbarbutton {
@@ -80,7 +80,6 @@
   #TabsToolbar > toolbarpaletteitem > #new-tab-button {
     list-style-image: url("resource://tabcenter/skin/glyph-new-16.svg") !important;
   }
-
   #main-window[brighttext] #TabsToolbar .tabs-newtab-button,
   #main-window[brighttext] #TabsToolbar > #new-tab-button,
   #main-window[brighttext] #TabsToolbar > toolbarpaletteitem > #new-tab-button {

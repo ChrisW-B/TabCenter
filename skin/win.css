@@ -52,14 +52,10 @@
   }
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 /* making titlebar unnecessary */
 #nav-bar {
   margin-top:6px;
-  padding-right:140px!important;
+  padding-right:140px !important;
 }
 
 #TabsToolbar {

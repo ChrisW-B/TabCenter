@@ -38,41 +38,35 @@
 /* global require, exports:false, PageThumbs:false, CustomizableUI:false PluralForm:false*/
 'use strict';
 
-<<<<<<< HEAD
 const {
-	Cc,
-	Ci,
-	Cu
+  Cc,
+  Ci,
+  Cu
 } = require('chrome');
 const {
-	platform
+  platform
 } = require('sdk/system');
 const {
-	prefs
+  prefs
 } = require('sdk/simple-prefs');
+const {get,
+  set
+} = require('sdk/preferences/service');
+
 const {
-	addPingStats,
-	Stats,
-	setDefaultPrefs
+  sendPing,
+  setDefaultPrefs,
+  removeStylesheets,
+  installStylesheets
 } = require('./utils');
 const {
-	createExposableURI
+  createExposableURI
 } = Cc['@mozilla.org/docshell/urifixup;1'].
 createInstance(Ci.nsIURIFixup);
-=======
-const {Cc, Ci, Cu} = require('chrome');
-const {platform} = require('sdk/system');
-const {prefs} = require('sdk/simple-prefs');
-const {get, set} = require('sdk/preferences/service');
-
-const {sendPing, setDefaultPrefs, removeStylesheets, installStylesheets} = require('./utils');
-const {createExposableURI} = Cc['@mozilla.org/docshell/urifixup;1'].
-                               createInstance(Ci.nsIURIFixup);
 const strings = require('./get-locale-strings').getLocaleStrings();
 const ss = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore);
 const utils = require('./utils');
 const system = require('sdk/system');
->>>>>>> master
 
 Cu.import('resource://gre/modules/PageThumbs.jsm');
 Cu.import('resource:///modules/CustomizableUI.jsm');
@@ -90,879 +84,6 @@ const WAIT_BEFORE_RESIZE = 1000;
  *
  * Main entry point of this add-on.
  */
-<<<<<<< HEAD
-function VerticalTabs(window, data) {
-	this.window = window;
-	this.document = window.document;
-	this.unloaders = [];
-	this.stats = new Stats;
-	this.resizeTimeout = -1;
-	this.mouseInside = false;
-
-	window.createImageBitmap(data).then((response) => {
-		this.newTabImage = response;
-	});
-
-	this.init();
-}
-VerticalTabs.prototype = {
-
-	init: function() {
-		this.window.VerticalTabs = this;
-		this.PageThumbs = PageThumbs;
-		this._endRemoveTab = this.window.gBrowser._endRemoveTab;
-		this.inferFromText = this.window.ToolbarIconColor.inferFromText;
-		this.receiveMessage = this.window.gBrowser.receiveMessage;
-		let window = this.window;
-		let document = this.document;
-
-		let oldAddTab = window.gBrowser.addTab;
-		window.gBrowser.addTab = function(...args) {
-			let t = oldAddTab.bind(window.gBrowser)(...args);
-			if (prefs.opentabstop) {
-				let aRelatedToCurrent;
-				let aReferrerURI;
-				if (arguments.length === 2 && typeof arguments[1] === 'object' && !(arguments[1] instanceof Ci.nsIURI)) {
-					let params = arguments[1];
-					aReferrerURI = params.referrerURI;
-					aRelatedToCurrent = params.relatedToCurrent;
-				}
-				if ((aRelatedToCurrent == null ? aReferrerURI : aRelatedToCurrent) &&
-					Services.prefs.getBoolPref('browser.tabs.insertRelatedAfterCurrent')) {
-					let newTabPos = (this._lastRelatedTab || this.selectedTab)._tPos - 1;
-					this.moveTabTo(t, newTabPos);
-					this._lastRelatedTab = t;
-				} else {
-					this.moveTabTo(t, 0);
-				}
-			}
-			return t;
-		};
-
-		//reset _lastRelatedTab on changing preferences
-		require('sdk/simple-prefs').on('opentabstop', function() {
-			window.gBrowser._lastRelatedTab = null;
-		});
-
-		let tabs = document.getElementById('tabbrowser-tabs');
-		let tabsProgressListener = {
-			onLocationChange: (aBrowser, aWebProgress, aRequest, aLocation, aFlags) => {
-				for (let tab of this.window.gBrowser.visibleTabs) {
-					if (tab.linkedBrowser === aBrowser) {
-						tab.refreshThumbAndLabel();
-					}
-				}
-			},
-			onStateChange: (aBrowser, aWebProgress, aRequest, aFlags, aStatus) => {
-				if ((aFlags & Ci.nsIWebProgressListener.STATE_STOP) === Ci.nsIWebProgressListener.STATE_STOP) { // eslint-disable-line no-bitwise
-					this.adjustCrop();
-					for (let tab of this.window.gBrowser.visibleTabs) {
-						if (tab.linkedBrowser === aBrowser && tab.refreshThumbAndLabel) {
-							tab.refreshThumbAndLabel();
-						}
-					}
-				}
-			}
-		};
-		window.gBrowser.addTabsProgressListener(tabsProgressListener);
-
-		window.addEventListener('animationend', (e) => {
-			let tab = e.target;
-			if (e.animationName === 'slide-fade-in') {
-				tab.classList.remove('tab-visible');
-			} else if (e.animationName === 'fade-out') {
-				let tabStack = this.document.getAnonymousElementByAttribute(tab, 'class', 'tab-stack');
-				tabStack.collapsed = true; //there is a visual jump if we do not collapse the tab before the end of the animation
-			} else if (e.animationName === 'slide-out') {
-				this._endRemoveTab.bind(this.window.gBrowser)(tab);
-				this.resizeTabs();
-			}
-		});
-
-		window.gBrowser._endRemoveTab = (aTab) => {
-			window.gBrowser._blurTab(aTab);
-			aTab.classList.add('tab-hidden');
-		};
-
-		window.gBrowser.receiveMessage = (...args) => {
-			if (args[0].target.getAttribute('anonid') === 'initialBrowser' && args[0].name === 'Browser:WindowCreated' && Services.prefs.getIntPref('browser.startup.page') !== 3) {
-				let tab = window.gBrowser.getTabForBrowser(window.gBrowser.selectedBrowser);
-				while (tab.getAttribute('pinned') === 'true') {
-					tab = tab.nextSibling;
-				}
-				window.gBrowser.selectedTab = tab;
-			}
-			this.receiveMessage.bind(window.gBrowser)(...args);
-		};
-
-		window.ToolbarIconColor.inferFromText = function() {
-			if (!this._initialized) {
-				return;
-			}
-
-			function parseRGB(aColorString) {
-				let rgb = aColorString.match(/^rgba?\((\d+), (\d+), (\d+)/);
-				rgb.shift();
-				return rgb.map(x => parseInt(x));
-			}
-
-			let toolbarSelector = '#verticaltabs-box, #verticaltabs-box > toolbar:not([collapsed=true]):not(#addon-bar), #navigator-toolbox > toolbar:not([collapsed=true]):not(#addon-bar)';
-			if (platform === 'macosx') {
-				toolbarSelector += ':not([type=menubar])';
-			}
-			// The getComputedStyle calls and setting the brighttext are separated in
-			// two loops to avoid flushing layout and making it dirty repeatedly.
-
-			let luminances = new Map;
-			for (let toolbar of document.querySelectorAll(toolbarSelector)) {
-				let [r, g, b] = parseRGB(window.getComputedStyle(toolbar).color);
-				let luminance = 0.2125 * r + 0.7154 * g + 0.0721 * b;
-				luminances.set(toolbar, luminance);
-			}
-
-			for (let [toolbar, luminance] of luminances) {
-				if (luminance <= 110) {
-					toolbar.removeAttribute('brighttext');
-				} else {
-					toolbar.setAttribute('brighttext', 'true');
-				}
-			}
-
-			let mainWindow = document.getElementById('main-window');
-
-			if (/devedition/.test(mainWindow.style.backgroundImage)) {
-				mainWindow.setAttribute('devedition-theme', 'true');
-			} else {
-				mainWindow.removeAttribute('devedition-theme');
-			}
-
-		}.bind(this.window.ToolbarIconColor);
-
-		this.thumbTimer = this.window.setInterval(() => {
-			tabs.selectedItem.refreshThumbAndLabel();
-		}, 1000);
-
-		this.unloaders.push(function() {
-			if (this.thumbTimer) {
-				this.window.clearInterval(this.thumbTimer);
-				this.thumbTimer = null;
-			}
-			this.window.gBrowser.removeTabsProgressListener(tabsProgressListener);
-
-			this.window.ToolbarIconColor.inferFromText = this.inferFromText;
-			this.window.gBrowser._endRemoveTab = this._endRemoveTab;
-			this.window.gBrowser.addTab = oldAddTab;
-			this.window.gBrowser.receiveMessage = this.receiveMessage;
-		});
-		this.window.onunload = () => {
-			addPingStats(this.stats);
-		};
-
-		this.rearrangeXUL();
-
-		let results = this.document.getElementById('PopupAutoCompleteRichResult');
-
-		if (results) {
-			results.removeAttribute('width');
-		}
-		this.tabObserver = new this.document.defaultView.MutationObserver((mutations) => {
-			this.tabObserver.disconnect();
-			mutations.forEach((mutation) => {
-				if (mutation.type === 'attributes' &&
-					mutation.target.id === 'PopupAutoCompleteRichResult' &&
-					mutation.attributeName === 'width') {
-					results.removeAttribute('width');
-				} else if (mutation.type === 'attributes' && mutation.attributeName === 'overflow' && mutation.target.id === 'tabbrowser-tabs') {
-					if (mutation.target.getAttribute('overflow') !== 'true') {
-						tabs.setAttribute('overflow', 'true'); //always set overflow back to true
-					}
-				}
-			});
-			this.tabObserver.observe(tabs, {
-				childList: true,
-				attributes: true,
-				subtree: true
-			});
-			if (results) {
-				this.tabObserver.observe(results, {
-					attributes: true
-				});
-			}
-		});
-		this.tabObserver.observe(tabs, {
-			childList: true,
-			attributes: true,
-			subtree: true
-		});
-		if (results) {
-			this.tabObserver.observe(results, {
-				attributes: true
-			});
-		}
-
-		this.unloaders.push(function() {
-			this.tabObserver.disconnect();
-		});
-	},
-
-	createElement: function(label, attrs) {
-		let rv = this.document.createElementNS(NS_XUL, label);
-		if (attrs) {
-			for (let attr in attrs) {
-				rv.setAttribute(attr, attrs[attr]);
-			}
-		}
-		return rv;
-	},
-
-	rearrangeXUL: function() {
-		const window = this.window;
-		const document = this.document;
-
-		// Move the bottom stuff (findbar, addonbar, etc.) in with the
-		// tabbrowser.  That way it will share the same (horizontal)
-		// space as the brower.  In other words, the bottom stuff no
-		// longer extends across the whole bottom of the window.
-		let mainWindow = document.getElementById('main-window');
-		let contentbox = document.getElementById('appcontent');
-		let bottom = document.getElementById('browser-bottombox');
-		contentbox.appendChild(bottom);
-		let top = document.getElementById('navigator-toolbox');
-		let browserPanel = document.getElementById('browser-panel');
-		let autocomplete = document.getElementById('PopupAutoCompleteRichResult');
-		let autocompleteOpen = autocomplete._openAutocompletePopup;
-		autocomplete._openAutocompletePopup = (aInput, aElement) => {
-			autocompleteOpen.bind(autocomplete)(aInput, aElement);
-			let rect = window.document.documentElement.getBoundingClientRect();
-			let popupDirection = autocomplete.style.direction;
-			let sidebar = document.getElementById('sidebar-box');
-
-			// Make the popup's starting margin negative so that the leading edge
-			// of the popup aligns with the window border.
-			let elementRect = aElement.getBoundingClientRect();
-			if (popupDirection === 'rtl') {
-				let offset = elementRect.right - rect.right;
-				let width = rect.width;
-				autocomplete.style.marginRight = offset + 'px';
-				autocomplete.style.width = width + 'px';
-			} else {
-				let offset = rect.left - elementRect.left;
-				let width = rect.width;
-				if (mainWindow.getAttribute('F11-fullscreen') !== 'true') {
-					if (mainWindow.getAttribute('tabspinned') !== 'true') {
-						offset += 30;
-						width -= 30;
-					} else {
-						offset += this.pinnedWidth;
-						width -= this.pinnedWidth;
-					}
-				}
-				if (sidebar.getAttribute('hidden') !== 'true') {
-					offset += sidebar.getBoundingClientRect().width;
-					width -= sidebar.getBoundingClientRect().width;
-				}
-				autocomplete.style.marginLeft = offset + 'px';
-				autocomplete.style.width = width + 'px';
-			}
-		};
-
-		// save the label of the first tab, and the toolbox palette for later…
-		let tabs = document.getElementById('tabbrowser-tabs');
-		let label = tabs.firstChild.label;
-		let palette = top.palette;
-
-		// Save the position of the tabs in the toolbar, for later restoring.
-		let toolbar = document.getElementById('TabsToolbar');
-		let tabsIndex = 0;
-		for (let i = 0; i < toolbar.children.length; i++) {
-			if (toolbar.children[i] === tabs) {
-				tabsIndex = i;
-				break;
-			}
-		}
-
-		//if new tab button is not in toolbar, find it and insert it.
-		if (!toolbar.querySelector('#new-tab-button')) {
-			//save position of button for restoring later
-			let NewTabButton = CustomizableUI.getWidget('new-tab-button').forWindow(this.window).node;
-			let NewTabButtonParent = NewTabButton.parentNode;
-			let NewTabButtonSibling = NewTabButton.nextSibling;
-			toolbar.insertBefore(NewTabButton, toolbar.firstChild);
-
-			this.unloaders.push(function() {
-				// put the newTab button back where it belongs
-				NewTabButtonParent.insertBefore(NewTabButton, NewTabButtonSibling);
-			});
-		}
-
-		contentbox.insertBefore(top, contentbox.firstChild);
-
-		// Create a box next to the app content. It will hold the tab
-		// bar and the tab toolbar.
-		let browserbox = document.getElementById('browser');
-		let leftbox = this.createElement('vbox', {
-			'id': 'verticaltabs-box'
-		});
-		let splitter = this.createElement('vbox', {
-			'id': 'verticaltabs-splitter'
-		});
-
-		if (mainWindow.getAttribute('tabspinned') !== 'true' && mainWindow.getAttribute('tabspinned') !== 'false') {
-			mainWindow.setAttribute('tabspinned', 'true');
-			leftbox.setAttribute('expanded', 'true');
-		}
-
-		browserbox.insertBefore(leftbox, contentbox);
-		browserbox.insertBefore(splitter, browserbox.firstChild);
-		mainWindow.setAttribute('persist',
-			mainWindow.getAttribute('persist') + ' tabspinned tabspinnedwidth');
-
-		this.pinnedWidth = +mainWindow.getAttribute('tabspinnedwidth').replace('px', '') ||
-			+window.getComputedStyle(document.documentElement)
-			.getPropertyValue('--pinned-width').replace('px', '');
-		document.documentElement.style.setProperty('--pinned-width', `${this.pinnedWidth}px`);
-
-		splitter.addEventListener('mousedown', (event) => {
-			let initialX = event.screenX - this.pinnedWidth;
-			let mousemove = (event) => {
-				// event.preventDefault();
-				let xDelta = event.screenX - initialX;
-				this.pinnedWidth = xDelta;
-				if (this.pinnedWidth < 30) {
-					this.pinnedWidth = 30;
-				}
-				if (this.pinnedWidth > document.width / 2) {
-					this.pinnedWidth = document.width / 2;
-				}
-				document.documentElement.style.setProperty('--pinned-width', `${this.pinnedWidth}px`);
-				mainWindow.setAttribute('tabspinnedwidth', `${this.pinnedWidth}px`);
-				this.resizeFindInput();
-				this.resizeTabs();
-			};
-
-			let mouseup = (event) => {
-				document.removeEventListener('mousemove', mousemove);
-				document.removeEventListener('mouseup', mouseup);
-			};
-
-			document.addEventListener('mousemove', mousemove);
-			document.addEventListener('mouseup', mouseup);
-		});
-
-		// Move the tabs next to the app content, make them vertical,
-		// and restore their width from previous session
-		tabs.setAttribute('vertical', true);
-		tabs.setAttribute('overflow', 'true');
-		leftbox.insertBefore(tabs, leftbox.firstChild);
-		tabs.orient = 'vertical';
-		tabs.mTabstrip.orient = 'vertical';
-		tabs.tabbox.orient = 'horizontal'; // probably not necessary
-
-		// And restore the label and palette here.
-		tabs.firstChild.label = label;
-		top.palette = palette;
-
-		// Move the tabs toolbar into the tab strip
-		toolbar.setAttribute('collapsed', 'false'); // no more vanishing new tab toolbar
-		toolbar._toolbox = null; // reset value set by constructor
-		toolbar.setAttribute('toolboxid', 'navigator-toolbox');
-
-		let pin_button = this.createElement('toolbarbutton', {
-			'id': 'pin-button',
-			'tooltiptext': 'Keep sidebar open',
-			'onclick': `let box = document.getElementById('main-window');
-        let button = document.getElementById('pin-button');
-        let newstate = box.getAttribute('tabspinned') == 'true' ? 'false' : 'true';
-        box.setAttribute('tabspinned', newstate);
-        if (newstate == 'true') {
-          window.VerticalTabs.stats.tab_center_pinned++;
-          button.setAttribute('tooltiptext', 'Shrink sidebar when not in use');
-        } else {
-          window.VerticalTabs.stats.tab_center_unpinned++;
-          button.setAttribute('tooltiptext', 'Keep sidebar open');
-          document.getElementById('verticaltabs-box').removeAttribute('search_expanded');
-        }
-        window.VerticalTabs.resizeFindInput();
-        window.VerticalTabs.resizeTabs();
-        `
-		});
-
-		toolbar.appendChild(pin_button);
-		leftbox.insertBefore(toolbar, leftbox.firstChild);
-		let find_input = this.createElement('textbox', {
-			'id': 'find-input',
-			'class': 'searchbar-textbox'
-		});
-		let search_icon = this.createElement('image', {
-			'id': 'tabs-search'
-		});
-		find_input.appendChild(search_icon);
-		search_icon.addEventListener('click', function(e) {
-			find_input.focus();
-		});
-		find_input.addEventListener('input', this.filtertabs.bind(this));
-		this.window.addEventListener('keyup', (e) => {
-			if (e.keyCode === 27) {
-				this.clearFind();
-			}
-		});
-
-		leftbox.contextMenuOpen = false;
-		let contextMenuHidden = (event) => {
-			//don't catch close events from tooltips
-			if (event.originalTarget.tagName === 'xul:menupopup' || event.originalTarget.tagName === 'menupopup') {
-				leftbox.contextMenuOpen = false;
-				// give user time to move mouse back in after closing context menu,
-				// also allow for event to finish before checking for this.mouseInside
-				window.setTimeout(() => {
-					exit();
-				}, 200);
-			}
-		};
-
-		document.addEventListener('popuphidden', contextMenuHidden);
-		leftbox.addEventListener('contextmenu', function(event) {
-			if (event.target.tagName === 'tab' || event.target.id === 'new-tab-button' || event.target.id === 'pin-button' || event.target.id === 'find-input') {
-				this.contextMenuOpen = true;
-			}
-		});
-
-		document.getElementById('filler-tab').addEventListener('click', this.clearFind.bind(this));
-
-		let spacer = this.createElement('spacer', {
-			'id': 'new-tab-spacer'
-		});
-		toolbar.insertBefore(find_input, pin_button);
-		toolbar.insertBefore(spacer, pin_button);
-
-		this.resizeFindInput();
-
-		// change the text in the tab context box
-		let close_next_tabs_message = document.getElementById('context_closeTabsToTheEnd');
-		let previous_close_message = close_next_tabs_message.getAttribute('label');
-		close_next_tabs_message.setAttribute('label', 'Close Tabs Below');
-
-		//remove option to movetopanel or removefromtoolbar from the new-tab-button
-		let oldOnViewToolbarsPopupShowing = window.onViewToolbarsPopupShowing;
-		window.onViewToolbarsPopupShowing = function(aEvent, aInsertPoint) {
-			oldOnViewToolbarsPopupShowing(aEvent, aInsertPoint);
-			if (aEvent.explicitOriginalTarget.id === 'new-tab-button') {
-				aEvent.target.querySelector('.customize-context-moveToPanel').setAttribute('disabled', true);
-				aEvent.target.querySelector('.customize-context-removeFromToolbar').setAttribute('disabled', true);
-			}
-		};
-
-		let enterTimeout = -1;
-
-		let exit = (event) => {
-			if (!this.mouseInside) {
-				if (enterTimeout > 0) {
-					window.clearTimeout(enterTimeout);
-					enterTimeout = -1;
-				}
-				if (mainWindow.getAttribute('tabspinned') !== 'true' && leftbox.getAttribute('search_expanded') !== 'true' && !leftbox.contextMenuOpen) {
-					leftbox.removeAttribute('expanded');
-					this.clearFind();
-					this.adjustCrop();
-					let tabsPopup = document.getElementById('alltabs-popup');
-					if (tabsPopup.state === 'open') {
-						tabsPopup.hidePopup();
-					}
-				}
-			}
-		};
-
-		let enter = (event) => {
-			this.mouseEntered();
-			if (leftbox.getAttribute('expanded') !== 'true') {
-				this.recordExpansion();
-				if (event.type === 'mouseenter') {
-					enterTimeout = window.setTimeout(() => {
-						leftbox.setAttribute('expanded', 'true');
-						this.adjustCrop();
-					}, 300);
-				} else if (event.pageX <= 4) {
-					if (enterTimeout > 0) {
-						window.clearTimeout(enterTimeout);
-						enterTimeout = -1;
-					}
-					leftbox.setAttribute('expanded', 'true');
-					this.adjustCrop();
-				}
-			}
-		};
-
-
-		let pauseBeforeExit = () => {
-			this.mouseExited();
-			window.setTimeout(() => {
-				exit();
-			}, 200);
-		};
-
-		tabs.ondragleave = function(e) {
-			if (!e.relatedTarget || !e.relatedTarget.closest('#tabbrowser-tabs')) {
-				if (tabs.getAttribute('movingtab') === 'true') {
-					let scrollbox = document.getAnonymousElementByAttribute(tabs, 'anonid', 'arrowscrollbox');
-					let scrollbuttonDown = document.getAnonymousElementByAttribute(scrollbox, 'anonid', 'scrollbutton-down');
-					let scrollbuttonUp = document.getAnonymousElementByAttribute(scrollbox, 'anonid', 'scrollbutton-up');
-					scrollbuttonUp.onmouseout();
-					scrollbuttonDown.onmouseout();
-				}
-			}
-		};
-
-		leftbox.addEventListener('mouseenter', enter);
-		leftbox.addEventListener('mousemove', enter);
-		leftbox.addEventListener('mouseleave', pauseBeforeExit);
-		leftbox.addEventListener('mousedown', (event) => {
-			// Don't register clicks on stuff in the leftbar if it's not open.
-			if (event.mozInputSource === Ci.nsIDOMMouseEvent.MOZ_SOURCE_TOUCH &&
-				leftbox.getAttribute('expanded') !== 'true') {
-				event.stopPropagation();
-			}
-		}, true);
-
-		let oldUpdateToolbars = window.FullScreen._updateToolbars;
-		window.FullScreen._updateToolbars = (aEnterFS) => {
-			oldUpdateToolbars.bind(window.FullScreen)(aEnterFS);
-			let fullscreenctls = document.getElementById('window-controls');
-			let navbar = document.getElementById('nav-bar');
-			let toggler = document.getElementById('fullscr-toggler');
-			let sibling = document.getElementById('navigator-toolbox').nextSibling;
-
-			if (aEnterFS && fullscreenctls.parentNode.id === 'TabsToolbar') {
-				navbar.appendChild(fullscreenctls);
-				toggler.removeAttribute('hidden');
-				//hidden nav toolbox needs to be moved 1 pix higher to account for the toggler every time it hides
-				window.gNavToolbox.style.marginTop = (-window.gNavToolbox.getBoundingClientRect().height - 1) + 'px';
-				document.getElementById('appcontent').insertBefore(toggler, sibling);
-				mainWindow.setAttribute('F11-fullscreen', 'true');
-			} else {
-				mainWindow.removeAttribute('F11-fullscreen');
-			}
-		};
-
-		tabs.addEventListener('TabOpen', this, false);
-		tabs.addEventListener('TabClose', this, false);
-		tabs.addEventListener('TabPinned', this, false);
-		tabs.addEventListener('TabUnpinned', this, false);
-		window.setTimeout(() => {
-			if (mainWindow.getAttribute('tabspinned') === 'true') {
-				leftbox.setAttribute('expanded', 'true');
-			}
-			for (let i = 0; i < tabs.childNodes.length; i++) {
-				this.initTab(tabs.childNodes[i]);
-			}
-		}, 150);
-
-		let beforeListener = function() {
-			browserPanel.insertBefore(top, browserPanel.firstChild);
-			top.palette = palette;
-		};
-		window.addEventListener('beforecustomization', beforeListener);
-
-		let changeListener = () => {
-			setDefaultPrefs();
-		};
-		window.addEventListener('customizationchange', changeListener);
-
-		let afterListener = function() {
-			contentbox.insertBefore(top, contentbox.firstChild);
-			top.palette = palette;
-		};
-		window.addEventListener('aftercustomization', afterListener);
-
-		window.addEventListener('resize', this.resizeTabs.bind(this), false);
-		this.adjustCrop();
-
-		this.unloaders.push(function() {
-			autocomplete._openAutocompletePopup = autocompleteOpen;
-			window.FullScreen._updateToolbars = oldUpdateToolbars;
-
-			// Move the tabs toolbar back to where it was
-			toolbar._toolbox = null; // reset value set by constructor
-			toolbar.removeAttribute('toolboxid');
-			toolbar.removeAttribute('collapsed');
-			toolbar.removeChild(spacer);
-			toolbar.removeChild(find_input);
-			toolbar.removeChild(pin_button);
-			let toolbox = document.getElementById('navigator-toolbox');
-			let navbar = document.getElementById('nav-bar');
-			let browserPanel = document.getElementById('browser-panel');
-
-			//remove customization event listeners which move the toolbox
-			window.removeEventListener('beforecustomization', beforeListener);
-			window.removeEventListener('customizationchange', changeListener);
-			window.removeEventListener('aftercustomization', afterListener);
-
-			//restore the changed menu items
-			window.onViewToolbarsPopupShowing = oldOnViewToolbarsPopupShowing;
-			close_next_tabs_message.setAttribute('label', previous_close_message);
-
-			// Put the tabs back up top
-			tabs.orient = 'horizontal';
-			tabs.mTabstrip.orient = 'horizontal';
-			tabs.tabbox.orient = 'vertical'; // probably not necessary
-			tabs.removeAttribute('width');
-			tabs.removeEventListener('TabOpen', this, false);
-			tabs.removeEventListener('TabClose', this, false);
-			tabs.removeEventListener('TabPinned', this, false);
-			tabs.removeEventListener('TabUnpinned', this, false);
-
-			//save the first tab's label to restore after unbinding/binding
-			label = tabs.firstChild.label;
-			tabs.removeAttribute('vertical');
-
-			// Restore all individual tabs.
-			for (let i = 0; i < tabs.childNodes.length; i++) {
-				let tab = tabs.childNodes[i];
-				tab.setAttribute('crop', 'end');
-			}
-
-			// Remove all the crap we added.
-			browserbox.removeChild(leftbox);
-			browserbox.removeChild(splitter);
-			browserbox.removeAttribute('dir');
-			mainWindow.removeAttribute('tabspinned');
-			mainWindow.removeAttribute('tabspinnedwidth');
-			mainWindow.setAttribute('persist',
-				mainWindow.getAttribute('persist').replace(' tabspinnned', ''));
-			leftbox = null;
-
-			// Restore the tab strip.
-			toolbar.insertBefore(tabs, toolbar.children[tabsIndex]);
-			toolbox.insertBefore(toolbar, navbar);
-			browserPanel.insertBefore(toolbox, browserPanel.firstChild);
-			browserPanel.insertBefore(bottom, document.getElementById('fullscreen-warning').nextSibling);
-			top.palette = palette;
-			tabs.firstChild.label = label;
-			this.window.TabsInTitlebar.updateAppearance(true);
-		});
-	},
-
-	recordExpansion: function() {
-		this.stats.tab_center_expanded++;
-	},
-
-	adjustCrop: function() {
-		let tabs = this.document.getElementById('tabbrowser-tabs');
-		if (this.window.document.getElementById('verticaltabs-box').getAttribute('expanded') === 'true' || this.document.getElementById('main-window').getAttribute('tabspinned') === '') {
-			for (let i = 0; i < tabs.childNodes.length; i++) {
-				tabs.childNodes[i].setAttribute('crop', 'end');
-			}
-		} else {
-			for (let i = 0; i < tabs.childNodes.length; i++) {
-				tabs.childNodes[i].removeAttribute('crop');
-			}
-		}
-	},
-
-	resizeFindInput: function() {
-		let spacer = this.document.getElementById('new-tab-spacer');
-		let find_input = this.document.getElementById('find-input');
-		if (this.pinnedWidth > 190 || this.document.getElementById('main-window').getAttribute('tabspinned') !== 'true') {
-			spacer.style.visibility = 'collapse';
-			find_input.style.visibility = 'visible';
-		} else {
-			find_input.style.visibility = 'collapse';
-			spacer.style.visibility = 'visible';
-		}
-	},
-
-	clearFind: function() {
-		this.document.getElementById('find-input').value = '';
-		this.filtertabs();
-	},
-
-	filtertabs: function() {
-		let document = this.document;
-		let tabs = this.window.gBrowser.visibleTabs;
-		let find_input = document.getElementById('find-input');
-		let input_value = find_input.value.toLowerCase();
-		let hidden_counter = 0;
-		let hidden_tab = document.getElementById('filler-tab');
-		let hidden_tab_label = hidden_tab.firstChild;
-
-		for (let i = 0; i < tabs.length; i++) {
-			let tab = tabs[i];
-			if (tab.label.toLowerCase().match(input_value) || this.getUri(tab).spec.toLowerCase().match(input_value)) {
-				tab.setAttribute('hidden', false);
-			} else {
-				hidden_counter += 1;
-				tab.setAttribute('hidden', true);
-			}
-		}
-		if (hidden_counter > 0) {
-			hidden_tab_label.setAttribute('value', `${hidden_counter} more tab${hidden_counter > 1 ? 's' : ''}...`);
-			hidden_tab.removeAttribute('hidden');
-		} else {
-			hidden_tab.setAttribute('hidden', 'true');
-		}
-		this.actuallyResizeTabs();
-	},
-
-	getUri: function(tab) {
-		// Strips out the `wyciwyg://` from internal URIs
-		return createExposableURI(tab.linkedBrowser.currentURI);
-	},
-
-	initTab: function(aTab) {
-		let document = this.document;
-		this.clearFind();
-		this.resizeTabs();
-
-		aTab.classList.add('tab-visible');
-		aTab.classList.remove('tab-hidden');
-
-		if (document.getElementById('tabbrowser-tabs').getAttribute('expanded') !== 'true') {
-			aTab.removeAttribute('crop');
-		} else {
-			aTab.setAttribute('crop', 'end');
-		}
-
-		aTab.refreshThumbAndLabel();
-	},
-
-	unload: function() {
-		this.unloaders.forEach(function(func) {
-			func.call(this);
-		}, this);
-		delete this.window.VerticalTabs;
-	},
-
-	actuallyResizeTabs: function() {
-		if (this.resizeTimeout > 0) {
-			this.window.clearTimeout(this.resizeTimeout);
-			this.resizeTimeout = -1;
-		}
-		let tabs = this.document.getElementById('tabbrowser-tabs');
-		switch (prefs.largetabs) {
-			case 0:
-				tabs.classList.remove('large-tabs');
-				return;
-			case 1:
-				{
-					let tabbrowser_height = tabs.clientHeight;
-					let number_of_tabs = this.window.gBrowser.visibleTabs.length;
-					if (tabbrowser_height / number_of_tabs >= 58 && this.pinnedWidth > 60) {
-						tabs.classList.add('large-tabs');
-						this.refreshAllTabs();
-					} else {
-						tabs.classList.remove('large-tabs');
-					}
-					return;
-				}
-			case 2:
-				tabs.classList.add('large-tabs');
-				return;
-		}
-	},
-
-	refreshAllTabs: function() {
-		for (let tab of this.window.gBrowser.visibleTabs) {
-			tab.refreshThumbAndLabel();
-		}
-	},
-
-	resizeTabs: function() {
-		if (this.resizeTimeout > 0) {
-			this.window.clearTimeout(this.resizeTimeout);
-			this.resizeTimeout = -1;
-		}
-		if (!this.mouseInside) {
-			// If the mouse is outside the tab area,
-			// resize immediately
-			this.actuallyResizeTabs();
-		}
-	},
-
-	mouseEntered: function() {
-		let tabs = this.document.getElementById('tabbrowser-tabs');
-		if (this.resizeTimeout > 0) {
-			this.window.clearTimeout(this.resizeTimeout);
-			this.resizeTimeout = -1;
-		}
-		this.mouseInside = true;
-		let arrowscrollbox = this.document.getAnonymousElementByAttribute(tabs, 'anonid', 'arrowscrollbox');
-		let scrollbox = this.document.getAnonymousElementByAttribute(arrowscrollbox, 'anonid', 'scrollbox');
-		let scrolltop = scrollbox.scrollTop;
-
-		tabs.setAttribute('mouseInside', 'true');
-		scrollbox.scrollTop = scrolltop;
-	},
-
-	mouseExited: function() {
-		let tabs = this.document.getElementById('tabbrowser-tabs');
-		let arrowscrollbox = this.document.getAnonymousElementByAttribute(tabs, 'anonid', 'arrowscrollbox');
-		let scrollbox = this.document.getAnonymousElementByAttribute(arrowscrollbox, 'anonid', 'scrollbox');
-		let scrolltop = scrollbox.scrollTop;
-		this.mouseInside = false;
-		tabs.removeAttribute('mouseInside');
-		scrollbox.scrollTop = scrolltop;
-
-		if (this.resizeTimeout < 0) {
-			// Once the mouse exits the tab area, wait
-			// a bit before resizing
-			this.resizeTimeout = this.window.setTimeout(() => {
-				this.resizeTimeout = -1;
-				if (!this.mouseInside) {
-					this.actuallyResizeTabs();
-				}
-			}, WAIT_BEFORE_RESIZE);
-		}
-	},
-
-	/*** Event handlers ***/
-
-	handleEvent: function(aEvent) {
-		switch (aEvent.type) {
-			case 'DOMContentLoaded':
-				this.init();
-				return;
-			case 'TabOpen':
-				this.onTabOpen(aEvent);
-				return;
-			case 'TabClose':
-				this.onTabClose(aEvent);
-				return;
-			case 'TabPinned':
-				this.onTabPinned(aEvent);
-				return;
-			case 'TabUnpinned':
-				this.onTabUnpinned(aEvent);
-				return;
-			case 'mouseup':
-				this.onMouseUp(aEvent);
-				return;
-		}
-	},
-
-	onTabOpen: function(aEvent) {
-		let tab = aEvent.target;
-		this.stats.tabs_created++;
-		this.initTab(tab);
-	},
-
-	onTabClose: function(aEvent) {
-		this.stats.tabs_destroyed++;
-	},
-
-	onTabPinned: function(aEvent) {
-		this.stats.tabs_pinned++;
-	},
-
-	onTabUnpinned: function(aEvent) {
-		this.stats.tabs_unpinned++;
-	},
-};
-
-exports.addVerticalTabs = (win, data) => {
-	if (!win.VerticalTabs) {
-		new VerticalTabs(win, data);
-	}
-};
-=======
 function VerticalTabs(window, data, tabCenterStartup) {
   this.window = window;
   this.document = window.document;
@@ -1150,7 +271,9 @@ VerticalTabs.prototype = {
       this.tabContainer._positionPinnedTabs();
       this.tabContainer.adjustTabstrip();
 
-      this.getBrowserForTab(aTab).messageManager.sendAsyncMessage('Browser:AppTab', {isAppTab: true});
+      this.getBrowserForTab(aTab).messageManager.sendAsyncMessage('Browser:AppTab', {
+        isAppTab: true
+      });
 
       let event = document.createEvent('Events');
       event.initEvent('TabPinned', true, false);
@@ -1181,13 +304,13 @@ VerticalTabs.prototype = {
       switch (aCloseTabs) {
       case this.closingTabsEnum.ALL:
         tabsToClose = this.tabs.length - this._removingTabs.length -
-                      window.VerticalTabs.numPinnedtabs();
+            window.VerticalTabs.numPinnedtabs();
         break;
       case this.closingTabsEnum.OTHER:
         tabsToClose = this.visibleTabs.length - 1 - window.VerticalTabs.numPinnedtabs();
         break;
       case this.closingTabsEnum.TO_END:
-        if (!aTab){
+        if (!aTab) {
           throw new Error('Required argument missing: aTab');
         }
 
@@ -1202,7 +325,7 @@ VerticalTabs.prototype = {
       }
 
       const pref = aCloseTabs === this.closingTabsEnum.ALL ?
-                   'browser.tabs.warnOnClose' : 'browser.tabs.warnOnCloseOtherTabs';
+        'browser.tabs.warnOnClose' : 'browser.tabs.warnOnCloseOtherTabs';
       let shouldPrompt = Services.prefs.getBoolPref(pref);
       if (!shouldPrompt) {
         return true;
@@ -1211,7 +334,9 @@ VerticalTabs.prototype = {
       let ps = Services.prompt;
 
       // default to true: if it were false, we wouldn't get this far
-      let warnOnClose = {value: true};
+      let warnOnClose = {
+        value: true
+      };
       let bundle = this.mStringBundle;
 
       // focus the window before prompting.
@@ -1222,18 +347,17 @@ VerticalTabs.prototype = {
       window.focus();
       let warningMessage =
         PluralForm.get(tabsToClose, bundle.getString('tabs.closeWarningMultiple'))
-                  .replace('#1', tabsToClose);
+        .replace('#1', tabsToClose);
       let buttonPressed =
         ps.confirmEx(window,
-                     bundle.getString('tabs.closeWarningTitle'),
-                     warningMessage,
-                     (ps.BUTTON_TITLE_IS_STRING * ps.BUTTON_POS_0)
-                     + (ps.BUTTON_TITLE_CANCEL * ps.BUTTON_POS_1),
-                     bundle.getString('tabs.closeButtonMultiple'),
-                     null, null,
-                     aCloseTabs === this.closingTabsEnum.ALL ?
-                       bundle.getString('tabs.closeWarningPromptMe') : null,
-                     warnOnClose);
+          bundle.getString('tabs.closeWarningTitle'),
+          warningMessage,
+          (ps.BUTTON_TITLE_IS_STRING * ps.BUTTON_POS_0) + (ps.BUTTON_TITLE_CANCEL * ps.BUTTON_POS_1),
+          bundle.getString('tabs.closeButtonMultiple'),
+          null, null,
+          aCloseTabs === this.closingTabsEnum.ALL ?
+          bundle.getString('tabs.closeWarningPromptMe') : null,
+          warnOnClose);
       let reallyClose = (buttonPressed === 0);
 
       // don't set the pref unless they press OK and it's false
@@ -1272,7 +396,7 @@ VerticalTabs.prototype = {
         // aRelatedToCurrent can be undefined or null if the tab is
         //opened from an external application or bookmark
         if (((aRelatedToCurrent === null || aRelatedToCurrent === undefined) ? aReferrerURI : aRelatedToCurrent) &&
-        Services.prefs.getBoolPref('browser.tabs.insertRelatedAfterCurrent')) {
+          Services.prefs.getBoolPref('browser.tabs.insertRelatedAfterCurrent')) {
           let newTabPos = (this._lastRelatedTab || this.selectedTab)._tPos;
           this.moveTabTo(t, newTabPos);
           this._lastRelatedTab = t;
@@ -1392,7 +516,7 @@ VerticalTabs.prototype = {
       this.window.gBrowser.addTab = oldAddTab;
       this.window.gBrowser.getTabsToTheEndFrom = oldGetTabsToTheEndFrom;
       window.gBrowser.warnAboutClosingTabs = oldWarnAboutClosingTabs;
-      if (this.document.getElementById('top-tabs-button')){
+      if (this.document.getElementById('top-tabs-button')) {
         this.document.getElementById('TabsToolbar').removeChild(this.document.getElementById('top-tabs-button'));
       }
       close_next_tabs_message.setAttribute('label', previous_close_message);
@@ -1410,8 +534,8 @@ VerticalTabs.prototype = {
       this.tabObserver.disconnect();
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' &&
-                   mutation.target.id === 'PopupAutoCompleteRichResult' &&
-                   mutation.attributeName === 'width') {
+          mutation.target.id === 'PopupAutoCompleteRichResult' &&
+          mutation.attributeName === 'width') {
           results.removeAttribute('width');
         } else if (mutation.type === 'attributes' && mutation.attributeName === 'overflow' && mutation.target.id === 'tabbrowser-tabs') {
           if (mutation.target.getAttribute('overflow') !== 'true') {
@@ -1419,14 +543,26 @@ VerticalTabs.prototype = {
           }
         }
       });
-      this.tabObserver.observe(tabs, {childList: true, attributes: true, subtree: true});
+      this.tabObserver.observe(tabs, {
+        childList: true,
+        attributes: true,
+        subtree: true
+      });
       if (results) {
-        this.tabObserver.observe(results, {attributes: true});
+        this.tabObserver.observe(results, {
+          attributes: true
+        });
       }
     });
-    this.tabObserver.observe(tabs, {childList: true, attributes: true, subtree: true});
+    this.tabObserver.observe(tabs, {
+      childList: true,
+      attributes: true,
+      subtree: true
+    });
     if (results) {
-      this.tabObserver.observe(results, {attributes: true});
+      this.tabObserver.observe(results, {
+        attributes: true
+      });
     }
 
     this.unloaders.push(function () {
@@ -1526,10 +662,10 @@ VerticalTabs.prototype = {
       // them working again.
       let PlacesToolbar = document.getElementById('PlacesToolbar');
       if (PlacesToolbar &&
-          PlacesToolbar.controllers &&
-          PlacesToolbar.controllers.getControllerCount() === 0 &&
-          PlacesToolbar._placesView &&
-          PlacesToolbar._placesView._controller) {
+        PlacesToolbar.controllers &&
+        PlacesToolbar.controllers.getControllerCount() === 0 &&
+        PlacesToolbar._placesView &&
+        PlacesToolbar._placesView._controller) {
         PlacesToolbar.controllers.appendController(PlacesToolbar._placesView._controller);
       }
     }
@@ -1540,8 +676,12 @@ VerticalTabs.prototype = {
     // Create a box next to the app content. It will hold the tab
     // bar and the tab toolbar.
     let browserbox = document.getElementById('browser');
-    let leftbox = utils.createElement(document, 'vbox', {'id': 'verticaltabs-box'});
-    let splitter = utils.createElement(document, 'vbox', {'id': 'verticaltabs-splitter'});
+    let leftbox = utils.createElement(document, 'vbox', {
+      'id': 'verticaltabs-box'
+    });
+    let splitter = utils.createElement(document, 'vbox', {
+      'id': 'verticaltabs-splitter'
+    });
 
     if (mainWindow.getAttribute('tabspinned') === '') {
       mainWindow.setAttribute('tabspinned', 'true');
@@ -1552,8 +692,8 @@ VerticalTabs.prototype = {
     browserbox.insertBefore(splitter, browserbox.firstChild);
 
     this.pinnedWidth = +mainWindow.getAttribute('tabspinnedwidth').replace('px', '') ||
-                       +window.getComputedStyle(document.documentElement)
-                              .getPropertyValue('--pinned-width').replace('px', '');
+      +window.getComputedStyle(document.documentElement)
+      .getPropertyValue('--pinned-width').replace('px', '');
     document.documentElement.style.setProperty('--pinned-width', `${this.pinnedWidth}px`);
 
     this.collapsedWidth = +mainWindow.getAttribute('tabscollapsedWidth').replace('px', '') ||
@@ -1661,13 +801,17 @@ VerticalTabs.prototype = {
       this.filtertabs.call(this);
     });
     this.window.addEventListener('keyup', (e) => {
-      if(e.keyCode === 27) {
+      if (e.keyCode === 27) {
         this.clearFind();
       }
     });
-    find_input.onfocus = () => { this.sendPing('tab_center_search_focus', window);};
+    find_input.onfocus = () => {
+      this.sendPing('tab_center_search_focus', window);
+    };
     find_input.onblur = () => {
-      let details = {search_engaged: this.search_engaged};
+      let details = {
+        search_engaged: this.search_engaged
+      };
       this.sendPing('tab_center_search_blur', window, details);
       this.search_engaged = false;
     };
@@ -1688,7 +832,7 @@ VerticalTabs.prototype = {
       ss.setWindowValue(window, 'TCtoggledon', mainWindow.getAttribute('toggledon'));
       window.VerticalTabs.sendPing('tab_center_toggled_off', window);
       this.init();
-      if (mainWindow.getAttribute('F11-fullscreen') === 'true'){
+      if (mainWindow.getAttribute('F11-fullscreen') === 'true') {
         window.FullScreen._updateToolbars(true);
         window.FullScreen._isChromeCollapsed = false;
         window.FullScreen.hideNavToolbox();
@@ -1718,7 +862,9 @@ VerticalTabs.prototype = {
 
     document.getElementById('filler-tab').addEventListener('click', this.clearFind.bind(this));
 
-    let spacer = utils.createElement(document, 'spacer', {'id': 'new-tab-spacer'});
+    let spacer = utils.createElement(document, 'spacer', {
+      'id': 'new-tab-spacer'
+    });
     toolbar.insertBefore(find_input, pin_button);
     toolbar.insertBefore(spacer, pin_button);
     toolbar.insertBefore(toptabsbutton, toolbar.lastChild);
@@ -1813,7 +959,7 @@ VerticalTabs.prototype = {
     leftbox.addEventListener('mousedown', (event) => {
       // Don't register clicks on stuff in the leftbar if it's not open.
       if (event.mozInputSource === Ci.nsIDOMMouseEvent.MOZ_SOURCE_TOUCH &&
-          leftbox.getAttribute('expanded') !== 'true') {
+        leftbox.getAttribute('expanded') !== 'true') {
         event.stopPropagation();
       }
     }, true);
@@ -1940,7 +1086,7 @@ VerticalTabs.prototype = {
   },
 
   numPinnedtabs: function () {
-    let numPinned = 0 ;
+    let numPinned = 0;
     for (let i = 0; i < this.window.gBrowser.tabs.length; i++) {
       if (!this.window.gBrowser.tabs[i].pinned) {
         continue;
@@ -2010,7 +1156,9 @@ VerticalTabs.prototype = {
     if (find_input) {
       if (purpose === 'tabGroupChange') {
         //manually show pinned tabs after changing groups for the tab groups add-on, as it does not re-show them
-        Array.filter(this.window.gBrowser.tabs, tab => tab.getAttribute('pinned') === 'true').forEach(tab => {tab.setAttribute('hidden', false);});
+        Array.filter(this.window.gBrowser.tabs, tab => tab.getAttribute('pinned') === 'true').forEach(tab => {
+          tab.setAttribute('hidden', false);
+        });
         this.visibleTabs = Array.filter(this.window.gBrowser.tabs, tab => !tab.hidden && !tab.closing);
         find_input.value = '';
         this.filtertabs();
@@ -2132,19 +1280,20 @@ VerticalTabs.prototype = {
     case 0:
       tabs.classList.remove('large-tabs');
       return;
-    case 1: {
-      let tabbrowser_height = tabs.clientHeight;
-      let number_of_tabs = this.window.gBrowser.visibleTabs.length;
-      if (tabbrowser_height / number_of_tabs >= 58 && this.pinnedWidth > 60 && tabs.classList.contains('large-tabs')) {
+    case 1:
+      {
+        let tabbrowser_height = tabs.clientHeight;
+        let number_of_tabs = this.window.gBrowser.visibleTabs.length;
+        if (tabbrowser_height / number_of_tabs >= 58 && this.pinnedWidth > 60 && tabs.classList.contains('large-tabs')) {
+          return;
+        } else if (tabbrowser_height / number_of_tabs >= 58 && this.pinnedWidth > 60) {
+          tabs.classList.add('large-tabs');
+          this.refreshAllTabs();
+        } else if (tabs.classList.contains('large-tabs')) {
+          tabs.classList.remove('large-tabs');
+        }
         return;
-      } else if (tabbrowser_height / number_of_tabs >= 58 && this.pinnedWidth > 60 ) {
-        tabs.classList.add('large-tabs');
-        this.refreshAllTabs();
-      } else if (tabs.classList.contains('large-tabs')) {
-        tabs.classList.remove('large-tabs');
       }
-      return;
-    }
     case 2:
       tabs.classList.add('large-tabs');
       return;
@@ -2218,4 +1367,3 @@ exports.addVerticalTabs = (win, data, tabCenterStartup) => {
     new VerticalTabs(win, data, tabCenterStartup);
   }
 };
->>>>>>> master

@@ -1,6 +1,5 @@
-@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul") ;
-
-@namespace html url("http://www.w3.org/1999/xhtml") ;
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+@namespace html url("http://www.w3.org/1999/xhtml");
 
 :root {
   --tab-animation-time: 150ms;
@@ -8,18 +7,11 @@
   --pinned-width: 260px;
   --link-color: graytext;
   --link-color-brighttext: hsl(0, 0%, 60%);
-<<<<<<< HEAD
-  --color-blue-light: #1aa1ff;
-  --color-blue: #0996f8;
-  --color-blue-dark: #0675d3;
-  --color-teal: #01bdad;
-=======
   --tab-highlight-color: #1aa1ff;
 }
 
 #main-window {
   --collapsed-width: 45px;
->>>>>>> master
 }
 
 .tabbrowser-arrowscrollbox > scrollbox {
@@ -132,10 +124,6 @@
   flex: 1 0;
 }
 
-/* #main-window:not([inFullscreen]) .tabbrowser-arrowscrollbox {
-    padding-top: 30px;
-} */
-
 #tabbrowser-tabs::before,
 #tabbrowser-tabs + hbox,
 #tabbrowser-tabs > hbox {
@@ -150,15 +138,17 @@
 #verticaltabs-box {
   position: absolute;
   z-index: 3;
-  top: -1px;
+  top:0;
   left: 0;
   width: var(--collapsed-width);
   height: 100vh;
-  border-right: 1px solid ThreeDShadow;
+  border-right: 1px solid hsla(0, 0%, 0%, 0.2) !important;
+  border-top: 1px solid hsla(0, 0%, 0%, 0.2) !important;
   display: flex;
   overflow-x: hidden;
   box-sizing: border-box;
-  background-color: #fbfbfb;
+  background-color: hsl(0, 0%, 99%) !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0), inset 0 0 10px hsla(0, 0%, 0%, 0.2);
   flex-direction: column;
   transition: box-shadow 150ms ease-out, width 150ms ease-out;
 }
@@ -221,7 +211,8 @@
 #verticaltabs-box[expanded="true"],
 #verticaltabs-box[search_expanded="true"] {
   width: 260px;
-  transition-delay: 0.75s;
+  /* transition-delay: 0.75s; */
+  box-shadow: 0 0 10px hsla(0, 0%, 0%, 0.1), inset 0 0 10px hsla(0, 0%, 0%, 0);
 }
 
 #browser-border-start {
@@ -232,17 +223,11 @@
   position: relative !important;
   z-index: 99 !important;
   display: none;
-  max-width: 2px;
-  min-width: 2px;
-  width: 2px;
   margin-left: calc(var(--pinned-width) - 3px);
   margin-right: -1px !important;
-<<<<<<< HEAD
-=======
-  max-width: 2px;
-  min-width: 2px;
-  width: 2px;
->>>>>>> master
+  max-width: 4px;
+  min-width: 4px;
+  width: 4px;
   background-color: transparent;
   cursor: ew-resize;
 }
@@ -442,8 +427,8 @@
   pointer-events: auto !important;
 }
 
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-content,
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tabbrowser-tab {
+.tabbrowser-tabs.large-tabs .tab-content,
+.tabbrowser-tabs.large-tabs .tabbrowser-tab {
   max-height: 56px;
   min-height: 56px;
 }
@@ -475,7 +460,7 @@
   opacity: 1;
 }
 
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .title-wrapper .address-label {
+.tabbrowser-tabs.large-tabs .title-wrapper .address-label {
   display: -moz-box;
 }
 
@@ -524,50 +509,6 @@
   text-shadow: none;
 }
 
-<<<<<<< HEAD
-@keyframes fade-out {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes slide-out {
-  0% {
-    max-height: 36px;
-    min-height: 36px;
-    opacity: 0;
-  }
-
-  100% {
-    max-height: 0;
-    min-height: 0;
-    opacity: 0;
-  }
-}
-
-@keyframes slide-fade-in {
-  0% {
-    max-height: 0;
-    min-height: 0;
-    opacity: 0;
-  }
-
-  50% {
-    max-height: 36px;
-    min-height: 36px;
-    opacity: 0;
-  }
-
-  100% {
-    max-height: 36px;
-    min-height: 36px;
-    opacity: 1;
-  }
-=======
 @keyframes tab-fade-out {
   0% { max-height: 36px; min-height: 36px; opacity: 1; }
   50% { max-height: 36px; min-height: 36px; opacity: 0; }
@@ -578,7 +519,6 @@
   0% { max-height: 0; min-height: 0; opacity: 0; }
   50% { max-height: 36px; min-height: 36px; opacity: 0; }
   100% { max-height: 36px; min-height: 36px; opacity: 1; }
->>>>>>> master
 }
 
 @keyframes large-tab-fade-out {
@@ -597,7 +537,6 @@
 .tabbrowser-tab[selected="true"] {
   border-radius: 0 !important;
   background-color: hsla(0, 0%, 0%, 0.12) !important;
-  box-shadow: 1px 0 0 var(--color-blue-dark) inset, 2px 0 0 var(--color-blue) inset, 3px 0 0 var(--color-blue-light) inset;
   text-shadow: none;
 }
 
@@ -623,9 +562,6 @@
   background-position: center center !important;
   background-repeat: no-repeat !important;
   background-size: 12px !important;
-  transition-duration: 350ms !important;
-  transition-property: background-position !important;
-  transition-delay: 1s !important;
 }
 
 #main-window[brighttext] .tabbrowser-tab[pinned] .pinned-icon {
@@ -680,8 +616,8 @@
   box-shadow: 0 1px 0 hsla(0, 0%, 0%, 0.5) !important;
 }
 
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-icon-overlay[muted],
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-icon-overlay[soundplaying] {
+.tabbrowser-tabs.large-tabs .tab-icon-overlay[muted],
+.tabbrowser-tabs.large-tabs .tab-icon-overlay[soundplaying] {
   margin-inline-start: -64px !important;
   margin-inline-end: 48px !important;
   margin-top: -32px !important;
@@ -729,9 +665,6 @@
   padding: 0 !important;
 }
 
-<<<<<<< HEAD
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-meta-image {
-=======
 .tab-selected-indicator {
   display: block;
   height: 36px;
@@ -779,7 +712,6 @@
 }
 
 .tabbrowser-tabs.large-tabs .tab-meta-image {
->>>>>>> master
   max-width: 54px;
   max-height: 40px;
   min-width: 54px;
@@ -791,19 +723,24 @@
   background-position: top center !important;
   background-repeat: no-repeat !important;
   background-size: cover !important;
-  box-shadow: 0 0 2px 2px hsla(0, 0%, 0%, 0.02), 0 2px 0 hsla(0, 0%, 0%, 0.05), 0 0 0 1px hsla(0, 0%, 0%, 0.2);
+  box-shadow:
+    0 0 2px 2px hsla(0, 0%, 0%, 0.02),
+    0 2px 0 hsla(0, 0%, 0%, 0.05),
+    0 0 0 1px hsla(0, 0%, 0%, 0.2);
 }
 
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-throbber,
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs .tab-icon-image {
+.tabbrowser-tabs.large-tabs .tab-throbber,
+.tabbrowser-tabs.large-tabs .tab-icon-image {
   margin-top: 18px !important;
   margin-left: -2px !important;
   border-radius: 2px;
   background-color: #fff !important;
-  box-shadow: 0 0 2px hsla(0, 0%, 0%, 0.08), 0 0 0 1px hsla(0, 0%, 0%, 0.08);
+  box-shadow:
+    0 0 2px hsla(0, 0%, 0%, 0.08),
+    0 0 0 1px hsla(0, 0%, 0%, 0.08);
 }
 
-#main-window[tabspinned="true"] .tabbrowser-tabs.large-tabs html|canvas {
+.tabbrowser-tabs.large-tabs html|canvas {
   position: absolute;
   top: 7.5px;
   left: 12px;
@@ -817,14 +754,8 @@
   background-size: 54px 40px;
 }
 
-.tabbrowser-tabs:not(.large-tabs) .tab-meta-image html|canvas,
-#main-window[tabspinned="false"] .tabbrowser-tabs.large-tabs html|canvas {
+.tabbrowser-tabs:not(.large-tabs) .tab-meta-image html|canvas {
   display: none;
-}
-
-.tabbrowser-tabs:not(.large-tabs) .tab-meta-image,
-#main-window[tabspinned="false"] .tabbrowser-tabs.large-tabs .tab-meta-image {
-  margin-left: -4px !important;
 }
 
 .tab-throbber,
@@ -895,30 +826,8 @@
 }
 
 #TabsToolbar > #new-tab-button {
-<<<<<<< HEAD
-  display: -moz-box !important;
-  margin: 0 2px !important;
-  padding: 0 6px !important;
-=======
-  display: moz-box!important;#verticaltabs-box {
-  position: absolute;
-  z-index: 3;
-  top: 0;
-  left: 0;
-  width: var(--collapsed-width);
-  height: 100vh;
-  border-right: 1px solid hsla(0, 0%, 0%, 0.2) !important;
-  border-top: 1px solid hsla(0, 0%, 0%, 0.2) !important;
-  display: flex;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  background-color: hsl(0, 0%, 99%) !important;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0), inset 0 0 10px hsla(0, 0%, 0%, 0.2);
-  flex-direction: column;
-  transition: box-shadow 150ms ease-out, width 150ms ease-out;
-}
-  margin: 0 2px !important;
->>>>>>> master
+  margin: 0 4px !important;
+  min-width: 30px !important;
   -moz-box-align: center !important;
   -moz-box-orient: horizontal !important;
   -moz-box-pack: end !important;
@@ -937,9 +846,7 @@
 #TabsToolbar #new-tab-spacer {
   flex: 20 0 auto;
 }
-#new-tab-button > xul|label {
-  display: none !important
-}
+
 /* Tab toolbar styling */
 
 #verticaltabs-groupbutton {
@@ -1013,11 +920,10 @@
   background-size: 16px !important;
 }
 
-<<<<<<< HEAD
 /* other customization */
 #new-tab-button > xul|label {
-  display: none !important
-=======
+  display: none !important;
+}
 /* opentabstop option */
 
 #tabbrowser-tabs[opentabstop] .tabbrowser-arrowscrollbox > .arrowscrollbox-scrollbox .scrollbox-innerbox {
@@ -1027,5 +933,4 @@
 
 #tabbrowser-tabs[opentabstop] #filler-tab {
   -moz-box-ordinal-group: 0;
->>>>>>> master
 }
