@@ -5,19 +5,11 @@
 }
 
 #main-window:not([inFullscreen]) #urlbar-container {
-  margin-left: 60px;
-}
-
-#main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
-  margin-left: calc(2px - var(--pinned-width));
+  margin-left: 30px;
 }
 
 #main-window {
   --collapsed-width: 70px;
-}
-
-#main-window[tabspinned="true"]:not([inFullscreen]) #nav-bar {
-  margin-left: calc(2px - var(--pinned-width));
 }
 
 #verticaltabs-box #TabsToolbar {
