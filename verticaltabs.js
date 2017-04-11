@@ -38,31 +38,13 @@
 /* global require, exports:false, PageThumbs:false, CustomizableUI:false PluralForm:false*/
 'use strict';
 
-const {
-  Cc,
-  Ci,
-  Cu
-} = require('chrome');
-const {
-  platform
-} = require('sdk/system');
-const {
-  prefs
-} = require('sdk/simple-prefs');
-const {get,
-  set
-} = require('sdk/preferences/service');
+const {Cc, Ci, Cu} = require('chrome');
+const {prefs} = require('sdk/simple-prefs');
+const {get, set} = require('sdk/preferences/service');
 
-const {
-  sendPing,
-  setDefaultPrefs,
-  removeStylesheets,
-  installStylesheets
-} = require('./utils');
-const {
-  createExposableURI
-} = Cc['@mozilla.org/docshell/urifixup;1'].
-createInstance(Ci.nsIURIFixup);
+const {sendPing, setDefaultPrefs, removeStylesheets, installStylesheets} = require('./utils');
+const {createExposableURI} = Cc['@mozilla.org/docshell/urifixup;1'].
+                               createInstance(Ci.nsIURIFixup);
 const strings = require('./get-locale-strings').getLocaleStrings();
 const ss = Cc['@mozilla.org/browser/sessionstore;1'].getService(Ci.nsISessionStore);
 const utils = require('./utils');
@@ -173,6 +155,22 @@ VerticalTabs.prototype = {
     this._endRemoveTab = window.gBrowser._endRemoveTab;
     this.inferFromText = window.ToolbarIconColor.inferFromText;
     this.receiveMessage = window.gBrowser.receiveMessage;
+    this.showTab = window.gBrowser.showTab;
+
+    window.gBrowser.showTab = function (aTab) {
+      if (aTab.hidden && !aTab.getAttribute('filtered-out')) {
+        aTab.removeAttribute('hidden');
+        this._visibleTabs = null; // invalidate cache
+
+        this.tabContainer.adjustTabstrip();
+
+        this.tabContainer._setPositionalAttributes();
+
+        let event = document.createEvent('Events');
+        event.initEvent('TabShow', true, false);
+        aTab.dispatchEvent(event);
+      }
+    };
 
     let oldMoveTabTo = window.gBrowser.moveTabTo;
     window.gBrowser.moveTabTo = function (aTab, aIndex) {
@@ -307,7 +305,7 @@ VerticalTabs.prototype = {
             window.VerticalTabs.numPinnedtabs();
         break;
       case this.closingTabsEnum.OTHER:
-        tabsToClose = this.visibleTabs.length - 1 - window.VerticalTabs.numPinnedtabs();
+        tabsToClose = window.gBrowser.visibleTabs.length - 1 - window.VerticalTabs.numPinnedtabs();
         break;
       case this.closingTabsEnum.TO_END:
         if (!aTab) {
@@ -506,6 +504,7 @@ VerticalTabs.prototype = {
       }
       this.window.gBrowser.removeTabsProgressListener(tabsProgressListener);
 
+      this.window.gBrowser.showTab = this.showTab;
       this.window.ToolbarIconColor.inferFromText = this.inferFromText;
       this.window.gBrowser._endRemoveTab = this._endRemoveTab;
       this.window.gBrowser.receiveMessage = this.receiveMessage;
@@ -975,6 +974,12 @@ VerticalTabs.prototype = {
       }
     }, 150);
 
+    function checkCompactTheme() {
+      if(window.getComputedStyle(document.documentElement).getPropertyValue('--lwt-header-image').indexOf('browser/defaultthemes/compact') >= 0) {
+        mainWindow.setAttribute('compact-theme', true);
+      }
+    }
+
     function checkDevTheme() {
       if (/devedition/.test(mainWindow.style.backgroundImage)) {
         mainWindow.setAttribute('devedition-theme', 'true');
@@ -983,6 +988,7 @@ VerticalTabs.prototype = {
       }
     }
     checkDevTheme();
+    checkCompactTheme();
 
     let beforeListener = function () {
       browserPanel.insertBefore(top, browserPanel.firstChild);
@@ -1003,6 +1009,7 @@ VerticalTabs.prototype = {
       contentbox.appendChild(bottom);
       top.palette = palette;
       checkDevTheme();
+      checkCompactTheme();
       //query for and restore the urlbar value after customize mode does things....
       urlbar.value = window.gBrowser.mCurrentTab.linkedBrowser.currentURI.spec;
     };
@@ -1169,7 +1176,6 @@ VerticalTabs.prototype = {
         }
         find_input.value = '';
         this.filtertabs();
-        this.visibleTabs = null;
       } else {
         find_input.value = '';
         this.filtertabs();
@@ -1198,20 +1204,22 @@ VerticalTabs.prototype = {
 
   filtertabs: function () {
     let document = this.document;
-    this.visibleTabs = this.visibleTabs || Array.filter(this.window.gBrowser.tabs, tab => !tab.hidden && !tab.closing);
+    let visibleTabs = Array.filter(this.window.gBrowser.tabs, tab => (tab.getAttribute('filtered-out') || !tab.hidden) && !tab.closing);
     let find_input = document.getElementById('find-input');
     let input_value = find_input.value.toLowerCase();
     let hidden_counter = 0;
     let hidden_tab = document.getElementById('filler-tab');
     let hidden_tab_label = hidden_tab.firstChild;
 
-    for (let i = 0; i < this.visibleTabs.length; i++) {
-      let tab = this.visibleTabs[i];
+    for (let i = 0; i < visibleTabs.length; i++) {
+      let tab = visibleTabs[i];
       if ((tab.label || '').toLowerCase().match(input_value) || this.getUri(tab).spec.toLowerCase().match(input_value)) {
         tab.setAttribute('hidden', false);
+        tab.removeAttribute('filtered-out');
       } else {
         hidden_counter += 1;
         tab.setAttribute('hidden', true);
+        tab.setAttribute('filtered-out', true);
       }
     }
     if (hidden_counter > 0) {
@@ -1220,6 +1228,8 @@ VerticalTabs.prototype = {
     } else {
       hidden_tab.setAttribute('hidden', 'true');
     }
+    // clear the cache to force a recalculation (for tab sizing etc)
+    this.window.gBrowser._visibleTabs = null;
     this.delayResizeTabs(0);
   },
 
@@ -1238,7 +1248,6 @@ VerticalTabs.prototype = {
     } else {
       aTab.setAttribute('crop', 'end');
     }
-    this.visibleTabs = null;
   },
 
   unload: function () {
@@ -1345,7 +1354,9 @@ VerticalTabs.prototype = {
       this.onTabOpen(aEvent);
       return;
     case 'TabClose':
-      this.onTabClose(aEvent);
+      if(!this.window.gBrowser.visibleTabs.length) {
+        this.onCloseLastTab();
+      }
       return;
     }
   },
@@ -1356,10 +1367,13 @@ VerticalTabs.prototype = {
     this.initTab(tab);
   },
 
-  onTabClose: function (aEvent) {
-    this.visibleTabs = null;
-    this.clearFind('tabAction');
+  onCloseLastTab: function () {
+    this.clearFind();
   },
+
+  getFirefoxVersion: function () {
+    return Number.parseInt(system.version);
+  }
 };
 
 exports.addVerticalTabs = (win, data, tabCenterStartup) => {
