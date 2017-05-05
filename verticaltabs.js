@@ -463,6 +463,12 @@ VerticalTabs.prototype = {
       }
     });
 
+    this._removeTab = window.gBrowser.removeTab;
+    window.gBrowser.removeTab = (...args) => {
+      this._removeTab.bind(window.gBrowser)(...args);
+      window.gBrowser._endRemoveTab(args[0]);
+    };
+
     window.gBrowser._endRemoveTab = (aTab) => {
       window.gBrowser._blurTab(aTab);
       aTab.classList.add('tab-hidden');
@@ -504,6 +510,7 @@ VerticalTabs.prototype = {
       }
       this.window.gBrowser.removeTabsProgressListener(tabsProgressListener);
 
+      this.window.gBrowser.removeTab = this._removeTab;
       this.window.gBrowser.showTab = this.showTab;
       this.window.ToolbarIconColor.inferFromText = this.inferFromText;
       this.window.gBrowser._endRemoveTab = this._endRemoveTab;
